@@ -1,0 +1,47 @@
+import {BrowserModule} from '@angular/platform-browser';
+import {NgModule} from '@angular/core';
+import {RouterModule, Routes} from '@angular/router';
+import {HTTP_INTERCEPTORS, HttpClientModule, HttpClientXsrfModule} from '@angular/common/http';
+
+import {AppComponent} from './app.component';
+import {UserListComponent} from './components/user-list.component/user-list.component';
+import {HistoryComponent} from './components/history.component/history.component';
+import {ReactiveFormsModule} from "@angular/forms";
+
+const routes: Routes = [
+  {
+    path: 'users',
+    component: UserListComponent
+  },
+  {
+    path: 'history',
+    component: HistoryComponent
+  },
+  {
+    path: '**',
+    redirectTo: '/history',
+    pathMatch: 'full'
+  }
+];
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    UserListComponent,
+    HistoryComponent
+  ],
+  imports: [
+    BrowserModule,
+    ReactiveFormsModule,
+    HttpClientModule,
+    HttpClientXsrfModule.withOptions({
+      cookieName: 'Csrf-Token',
+      headerName: 'Csrf-Token',
+    }),
+    RouterModule.forRoot(routes)
+  ],
+  providers: [],
+  bootstrap: [AppComponent]
+})
+export class AppModule {
+}

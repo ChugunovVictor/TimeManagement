@@ -1,0 +1,79 @@
+.absent{
+  background: yellow;
+  color: black;
+}
+
+.late{
+  background: red;
+  color: white;
+}
+
+.in-time{
+  background: green;
+  color: white;
+}
+
+.observer{
+  padding: 5px;
+  flex:1;
+}
+
+.notifyer{
+  padding: 5px;
+  flex:1;
+  position: relative;
+}
+
+.userInfo{
+  margin: 5px;
+  padding: 5px;
+  font-size: 22px;
+  position: relative;
+  display: flex;
+}
+
+.fitContent{
+  width: fit-content;
+}
+
+.histories{
+  display: flex;
+  flex-direction: row;
+}
+
+input[type="date"], input[type="datetime-local"] {
+  font-size: 20px;
+  font-family: auto;
+  color: white;
+  border: none;
+  user-select: none;
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  width: calc(100% + 20px);
+  margin: -2px;
+}
+
+.date-placeholder{
+  background: white;
+  z-index: 5;
+}
+
+.notifyer .button{
+  width: 22px;
+  position: relative;
+  left: 55px;
+  border-radius: 5px;
+}
+
+.notifyer .login{
+  left: 77px;
+}
+
+.notifyer .logout{
+  left: 82px;
+}
+
+.disabled{
+  pointer-events: none;
+}

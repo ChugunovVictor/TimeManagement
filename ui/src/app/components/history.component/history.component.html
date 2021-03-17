@@ -1,0 +1,34 @@
+<div class="histories">
+  <div class="observer">
+    <ng-container *ngFor="let userHistory of usersHistory" class="observer">
+      <div [ngClass]="['userInfo', color(userHistory[1])]">
+        {{ userHistory[0].firstName }} {{ userHistory[0].lastName }}
+      </div>
+    </ng-container>
+  </div>
+
+  <div class="notifyer">
+    <div *ngFor="let user of users" class="userInfo fitContent">
+      <div class="date-placeholder">
+        {{ user.firstName }} {{ user.lastName }}
+      </div>
+      <div class="date-wrapper">
+        <input [type]="user.type === userType.Manager ? 'date' : 'datetime-local'">
+      </div>
+
+      <ng-container *ngIf="user.type === userType.Manager">
+        <img class="button" src="assets/accept.svg" (click)="sendEmail(user, $event)">
+      </ng-container>
+      <ng-container *ngIf="user.type !== userType.Manager">
+        <img class="button login" src="assets/accept.svg" (click)="logIn(user, $event)">
+        <img class="button logout" src="assets/delete.svg" (click)="logOut(user, $event)">
+      </ng-container>
+    </div>
+  </div>
+</div>
+
+<div #possibleReport>
+
+</div>
+
+<input (click)="toggleMechanics($event)" type="checkbox" style="transform: scale(2); position: absolute; top: 10px; right: 20px">

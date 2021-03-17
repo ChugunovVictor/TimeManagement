@@ -1,0 +1,70 @@
+<table class="user-list">
+  <thead>
+  <tr>
+    <th> First Name</th>
+    <th> Last Name</th>
+    <th> Type</th>
+    <th> Email</th>
+    <th> Password</th>
+    <th> Is Active</th>
+    <th><img class="button" src="assets/add.svg" (click)="add()"></th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr *ngFor="let m of userList; let i = index">
+    <td> {{ m.firstName }}</td>
+    <td> {{ m.lastName }}</td>
+    <td> {{ m.type }}</td>
+    <td> {{ m.email }}</td>
+    <td> {{ m.password }}</td>
+    <td> {{ m.isActive }}</td>
+    <td>
+      <img class="button" src="assets/edit.svg" (click)="edit(m)">
+      <img class="button" src="assets/delete.svg" (click)="delete(m)">
+    </td>
+  </tr>
+  </tbody>
+</table>
+
+<div class="modal hidden" #modal>
+  <div class="modal-content">
+    <form [formGroup]="userForm">
+      <table>
+        <tr>
+          <td>First Name:</td>
+          <td><input type="text" formControlName="firstName"></td>
+        </tr>
+        <tr>
+          <td>Last Name:</td>
+          <td><input type="text" formControlName="lastName"></td>
+        </tr>
+        <tr>
+          <td>Type:</td>
+          <td><select formControlName="type">
+            <option></option>
+            <option> {{ userType.Manager }} </option>
+            <option> {{ userType.Machanic }} </option>
+          </select></td>
+        </tr>
+        <tr *ngIf="userForm.value['type'] == userType.Manager">
+          <td>E-mail:</td>
+          <td><input type="email" formControlName="email" email="true"></td>
+        </tr>
+        <tr *ngIf="userForm.value['type'] == userType.Machanic">
+          <td>Password:</td>
+          <td><input #password type="text" formControlName="password"
+                     (keypress)="passwordCheck($event)" minlength="4" maxlength="4"></td>
+        </tr>
+        <tr>
+          <td>Is active:</td>
+          <td><input type="checkbox" formControlName="isActive"></td>
+        </tr>
+      </table>
+
+      <div class="actions">
+        <img class="button" src="assets/accept.svg" (click)="save()">
+        <img class="button" src="assets/delete.svg" (click)="cancel()">
+      </div>
+    </form>
+  </div>
+</div>
