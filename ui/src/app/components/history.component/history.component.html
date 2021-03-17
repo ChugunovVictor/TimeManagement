@@ -13,7 +13,15 @@
         {{ user.firstName }} {{ user.lastName }}
       </div>
       <div class="date-wrapper">
-        <input [type]="user.type === userType.Manager ? 'date' : 'datetime-local'">
+
+        <ng-container *ngIf="user.type === userType.Manager">
+          <input type="date" (change)="dateChange($event)">
+        </ng-container>
+        <ng-container *ngIf="user.type !== userType.Manager">
+          <input type="datetime-local">
+        </ng-container>
+
+
       </div>
 
       <ng-container *ngIf="user.type === userType.Manager">

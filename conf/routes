@@ -3,16 +3,16 @@
 # ~~~~
 
 # Serve index page from public directory
-GET     /                         controllers.FrontendController.index()
+GET     /                               controllers.FrontendController.index()
 
-GET     /api/users                controllers.UserController.list()
-POST    /api/user                 controllers.UserController.save()
-DELETE  /api/user/:id             controllers.UserController.delete(id: String)
-GET     /api/user/report          controllers.UserController.report()
+GET     /api/users                      controllers.UserController.list()
+POST    /api/user                       controllers.UserController.save()
+DELETE  /api/user/:id                   controllers.UserController.delete(id: String)
+GET     /api/user/:email/report/:date   controllers.UserController.report(email: String, date: Long)
 
-GET     /api/histories/:date      controllers.HistoryController.list(date: Long)
-POST    /api/history              controllers.HistoryController.save()
-GET     /api/report/:date         controllers.HistoryController.report(date: Long)
+GET     /api/histories/:date            controllers.HistoryController.list(date: Long)
+POST    /api/history                    controllers.HistoryController.save()
+GET     /api/report/:date               controllers.HistoryController.report(date: Long)
 
 # Serve static assets under public directory
-GET     /*file                    controllers.FrontendController.assetOrDefault(file)
+GET     /*file                          controllers.FrontendController.assetOrDefault(file)

@@ -18,9 +18,9 @@ export class HistoryService {
     return this.http.post<string>('/api/history', history);
   }
 
-  report(): Observable<string> {
+  report(date: string): Observable<string> {
     // @ts-ignore
-      return this.http.get<string>('/api/report/:date'.replace(':date', new Date().getTime()));
+      return this.http.get<string>('/api/report/:date'.replace(':date', Date.parse(date)));
   }
 
   constructor(private http: HttpClient) {

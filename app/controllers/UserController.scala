@@ -1,11 +1,13 @@
 package controllers
 
+import java.time.{Instant, LocalDateTime, ZoneId}
+
 import javax.inject._
 import models.{User, UserQueries}
 import play.api.libs.json.Json
 import play.api.mvc._
 import play.api.libs.json._
-import services.MailerService
+import services.{MailerService, TemplateBuilder}
 
 import scala.concurrent.Future
 // you need this import to have combinators
@@ -19,9 +21,11 @@ class UserController @Inject()(cc: ControllerComponents, ms: MailerService) exte
 
   import models.User._
 
-  def report(): Action[AnyContent] = Action { implicit request =>
-      ms.sendEmail(Seq("test TO <aaronright@yandex.ru>"))
-      Ok(Json.toJson("Empty body"))
+  def report(email: String, date: Long): Action[AnyContent] = Action { implicit request =>
+      val normalDate = LocalDateTime.ofInstant(Instant.ofEpochMilli(date), ZoneId.systemDefault())
+      val r = TemplateBuilder.make(normalDate)
+      ms.sendEmail(Seq(s"TimeManagement TO <$email>"), r);
+      Ok(Json.toJson("Operation complete"))
   }
 
   def list(): Action[AnyContent] = Action.async { implicit request =>
