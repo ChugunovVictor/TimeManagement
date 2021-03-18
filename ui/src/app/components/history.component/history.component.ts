@@ -44,9 +44,9 @@ export class HistoryComponent implements OnInit {
     this.load()
   }
 
-  sendEmail(user: User, event: MouseEvent) {
+  sendEmail(user: User) {
     // @ts-ignore
-    this.userService.sendReport(user.email, event.target.parentElement.getElementsByTagName("input")[0].value).subscribe(
+    this.userService.sendReport(user.email, document.getElementsByName(user.id)[0].value).subscribe(
       (result:any) => console.log(result)
     )
   }
@@ -63,14 +63,14 @@ export class HistoryComponent implements OnInit {
     });
   }
 
-  logIn(user: User, event: MouseEvent) {
+  logIn(user: User) {
     // @ts-ignore
-    this.save(user, event.target.parentElement.getElementsByTagName("input")[0].value, HistoryType.Login)
+    this.save(user, document.getElementsByName(user.id)[0].value, HistoryType.Login)
   }
 
-  logOut(user: User, event: MouseEvent) {
+  logOut(user: User) {
     // @ts-ignore
-    this.save(user, event.target.parentElement.getElementsByTagName("input")[0].value, HistoryType.Logout)
+    this.save(user, document.getElementsByName(user.id)("input")[0].value, HistoryType.Logout)
   }
 
   toggleMechanics(event: MouseEvent): void {

@@ -26,13 +26,15 @@
   </metadata>
   <g
      id="layer1">
+    <circle
+       style="fill:none;stroke:#FFF;stroke-width:2.11667;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       id="path835"
+       cx="13.276413"
+       cy="13.229167"
+       r="8.598958" />
     <path
        style="fill:none;stroke:#FFF;stroke-width:2.11666667;stroke-linecap:round;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
-       d="M 2.6458333,13.229167 H 23.8125"
-       id="path835" />
-    <path
-       style="fill:none;stroke:#FFF;stroke-width:2.11667;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="M 13.229167,2.6458335 V 23.8125"
-       id="path835-7" />
+       d="M 6.6145832,17.197916 C 19.84375,7.9374999 19.84375,7.9374999 19.84375,7.9374999"
+       id="path837" />
   </g>
 </svg>

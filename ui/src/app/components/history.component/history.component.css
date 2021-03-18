@@ -4,7 +4,7 @@
 }
 
 .late{
-  background: red;
+  background: darkred;
   color: white;
 }
 
@@ -62,18 +62,21 @@ input[type="date"], input[type="datetime-local"] {
 .notifyer .button{
   width: 22px;
   position: relative;
-  left: 55px;
   border-radius: 5px;
 }
 
 .notifyer .login{
-  left: 77px;
+
 }
 
 .notifyer .logout{
-  left: 82px;
+
 }
 
 .disabled{
   pointer-events: none;
+}
+
+.button img{
+  height: 22px;
 }

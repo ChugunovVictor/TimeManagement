@@ -77,6 +77,12 @@ object TemplateBuilder {
     }
   }
 
+  def timeToString(time: (Int, Int)): String = {
+    val hours = time._1
+    val minutes = if(time._2 > 9) time._2 else s"0${time._2}"
+    s"${hours}:${minutes}"
+  }
+
   def row(user: User, histories: Seq[History]): (String, (Int, Int)) = {
     var row = scala.io.Source.fromFile(getClass.getResource("/template/row.html").getFile()).getLines.mkString
 
@@ -92,11 +98,11 @@ object TemplateBuilder {
         row = row.replaceAll(s"::${day._1}_end", s"${loginLogout._2.lastOption.map(r => s"${r.date.getHour}:${r.date.getMinute}").getOrElse("")}")
 
         val dailyTotal = period(day._2.toList)
-        row = row.replaceAll(s"::${day._1}_total", s"${dailyTotal._1}:${dailyTotal._2}")
+        row = row.replaceAll(s"::${day._1}_total", s"${timeToString(dailyTotal)}")
         sum( acc, dailyTotal)
       })
 
-    row = row.replaceAll(s"::row_total", s"${rowTotal._1}:${rowTotal._2}")
+    row = row.replaceAll(s"::row_total", s"${timeToString(rowTotal)}")
 
     (row, rowTotal)
   }
@@ -116,7 +122,7 @@ object TemplateBuilder {
     })
 
     table = table.replaceAll("::rows", rows)
-    table = table.replaceAll("::total", s"${total._1}:${total._2}")
+    table = table.replaceAll("::total", s"${timeToString(total)}")
 
     table = table.replaceAll("::[A-Za-z_]+", "")
 

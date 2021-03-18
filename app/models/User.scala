@@ -71,8 +71,8 @@ object UserQueries{
   def insertOrUpdate(user: User)(implicit ec : ExecutionContext): Future[String] = {
     val query = sqlu"""
         INSERT INTO users(id,firstName,lastName,type,email,password,isActive) VALUES(
-          '#${user.id}', '#${user.firstName}', '#${user.lastName}', '#${user.`type`}', '#${user.email.getOrElse("")}',
-          #${user.password.getOrElse("")}, #${if (user.isActive) 1 else 0} ) ON CONFLICT(id) DO UPDATE SET firstName = excluded.firstName, lastName = excluded.lastName,
+          '#${user.id}', '#${user.firstName}', '#${user.lastName}', '#${user.`type`}', #${user.email.map("\"" + _ + "\"").getOrElse("NULL")},
+          #${user.password.getOrElse("NULL")}, #${if (user.isActive) 1 else 0} ) ON CONFLICT(id) DO UPDATE SET firstName = excluded.firstName, lastName = excluded.lastName,
              'type' = excluded.type, email = excluded.email, password = excluded.password, isActive = excluded.isActive;
           """
     App.db.run(query).map(_ => user.id)

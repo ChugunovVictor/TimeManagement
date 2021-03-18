@@ -18,6 +18,8 @@ export class UserListComponent implements OnInit {
   @ViewChild('modal') modal: ElementRef;
   // @ts-ignore
   @ViewChild('password') password: ElementRef;
+  // @ts-ignore
+  @ViewChild('email') email: ElementRef;
 
   userForm = new FormGroup({
     id: new FormControl(null),
@@ -106,11 +108,15 @@ export class UserListComponent implements OnInit {
         this.userForm.controls['password'].reset()
 
         if (result === 'Manager') {
-          this.userForm.controls['email'].setValidators([Validators.required, Validators.email]);
-          this.userForm.controls['password'].setValidators([Validators.maxLength(4)]);
+          this.userForm.controls['email'].setValidators([Validators.required]);
+          this.userForm.controls['email'].updateValueAndValidity();
+          this.userForm.controls['password'].setValidators([]);
+          this.userForm.controls['password'].updateValueAndValidity();
         } else {
-          this.userForm.controls['password'].setValidators([Validators.required, Validators.maxLength(4)]);
-          this.userForm.controls['email'].setValidators([Validators.email]);
+          this.userForm.controls['password'].setValidators([Validators.required]);
+          this.userForm.controls['password'].updateValueAndValidity();
+          this.userForm.controls['email'].setValidators([]);
+          this.userForm.controls['email'].updateValueAndValidity();
         }
       }
     )

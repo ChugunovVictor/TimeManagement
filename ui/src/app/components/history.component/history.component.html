@@ -15,22 +15,21 @@
       <div class="date-wrapper">
 
         <ng-container *ngIf="user.type === userType.Manager">
-          <input type="date" (change)="dateChange($event)">
+          <input [attr.name]="user.id" type="date" (change)="dateChange($event)">
         </ng-container>
         <ng-container *ngIf="user.type !== userType.Manager">
-          <input type="datetime-local">
+          <input [attr.name]="user.id" type="datetime-local">
         </ng-container>
-
-
       </div>
 
-      <ng-container *ngIf="user.type === userType.Manager">
-        <img class="button" src="assets/accept.svg" (click)="sendEmail(user, $event)">
-      </ng-container>
-      <ng-container *ngIf="user.type !== userType.Manager">
-        <img class="button login" src="assets/accept.svg" (click)="logIn(user, $event)">
-        <img class="button logout" src="assets/delete.svg" (click)="logOut(user, $event)">
-      </ng-container>
+      <div *ngIf="user.type === userType.Manager" style="position: absolute; right: -130px;">
+        <app-button (click)="sendEmail(user)" background="blue" title="Send" image="assets/send.svg"></app-button>
+      </div>
+      <div *ngIf="user.type !== userType.Manager"
+           style="position: absolute; right:  -233px; display: flex; flex-direction: row">
+        <app-button (click)="logIn(user)" background="green" title="Login" image="assets/accept.svg" style="margin-right: 5px"></app-button>
+        <app-button (click)="logOut(user)" background="darkred" title="Logout" image="assets/delete.svg" style="margin-right: 5px"></app-button>
+      </div>
     </div>
   </div>
 </div>
@@ -39,4 +38,5 @@
 
 </div>
 
-<input (click)="toggleMechanics($event)" type="checkbox" style="transform: scale(2); position: absolute; top: 10px; right: 20px">
+<input (click)="toggleMechanics($event)" type="checkbox"
+       style="transform: scale(2); position: absolute; top: 10px; right: 20px">

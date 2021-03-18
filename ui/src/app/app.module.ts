@@ -7,6 +7,7 @@ import {AppComponent} from './app.component';
 import {UserListComponent} from './components/user-list.component/user-list.component';
 import {HistoryComponent} from './components/history.component/history.component';
 import {ReactiveFormsModule} from "@angular/forms";
+import { ButtonComponent } from './components/button.component';
 
 const routes: Routes = [
   {
@@ -28,7 +29,8 @@ const routes: Routes = [
   declarations: [
     AppComponent,
     UserListComponent,
-    HistoryComponent
+    HistoryComponent,
+    ButtonComponent
   ],
   imports: [
     BrowserModule,

@@ -36,8 +36,11 @@ libraryDependencies ++= Seq(
   "com.typesafe.slick" %% "slick" % "3.3.2",
   "org.xerial" % "sqlite-jdbc" % "3.34.0",
   "com.typesafe.play" %% "play-mailer" % "8.0.1",
-  "com.typesafe.play" %% "play-mailer-guice" % "8.0.1"
+  "com.typesafe.play" %% "play-mailer-guice" % "8.0.1",
 )
+
+libraryDependencies += "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.24"
+libraryDependencies += "org.xhtmlrenderer" % "flying-saucer-pdf" % "9.1.20"
 
 scalaVersion in ThisBuild := "2.11.7"
 

@@ -1,23 +1,42 @@
 package services
 
-import play.api.libs.mailer._
-import java.io.File
-import org.apache.commons.mail.EmailAttachment
-import javax.inject.Inject
+import java.io.ByteArrayOutputStream
 
-class MailerService @Inject() (mailerClient: MailerClient) {
+import javax.inject.Inject
+import org.htmlcleaner.{CleanerProperties, HtmlCleaner, PrettyXmlSerializer, TagNode, XmlSerializer}
+import org.xhtmlrenderer.pdf.ITextRenderer
+import play.api.libs.mailer._;
+
+class MailerService @Inject()(mailerClient: MailerClient) {
+
+  def cleanHTML(html: String): String = {
+    val cleaner: HtmlCleaner = new HtmlCleaner();
+    val rootTagNode: TagNode = cleaner.clean(html);
+    val cleanerProperties: CleanerProperties = cleaner.getProperties();
+    val xmlSerializer: XmlSerializer = new PrettyXmlSerializer(cleanerProperties);
+    xmlSerializer.getAsString(rootTagNode);
+  }
+
+  def generatePDF(html: String): ByteArrayOutputStream = {
+    val io = new ByteArrayOutputStream()
+    val renderer = new ITextRenderer();
+    renderer.setDocumentFromString(cleanHTML(html));
+    renderer.layout();
+    renderer.createPDF(io);
+    io
+  }
 
   def sendEmail(to: Seq[String], html: String) = {
     val cid = "1234"
     val email = Email(
       "Time management report",
-      "test FROM <reportprodiesel@gmail.com>",
+      "ReportForProDiesel FROM <reportprodiesel@gmail.com>",
       to,
       attachments = Seq(
-        //AttachmentFile("attachment.pdf", new File("/some/path/attachment.pdf")),
+        AttachmentData("Report.pdf", generatePDF(html).toByteArray, "application/pdf"),
       ),
-      // bodyText = Some("A text message"),
-      bodyHtml = Some(html)
+      bodyText = Some("Report in attachment"),
+      // bodyHtml = Some(html)
     )
     mailerClient.send(email)
   }
