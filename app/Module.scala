@@ -1,13 +1,14 @@
+import akka.actor.{ActorSystem, Props}
 import com.google.inject.AbstractModule
-import com.typesafe.config.ConfigFactory
-
-import scala.concurrent.{Await, ExecutionContext}
+import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import javax.inject._
-import models.{HistoryQueries, UserQueries, UserTable}
-import slick.jdbc.JdbcBackend.Database
-import slick.lifted.TableQuery
+import models.{HistoryQueries, UserQueries}
+import play.api.inject.ApplicationLifecycle
+import play.inject.Injector
+import services.ScheduleService
 
 import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, ExecutionContext}
 
 /**
  * This class is a Guice module that tells Guice how to bind several
@@ -28,7 +29,13 @@ class Module extends AbstractModule {
 }
 
 @Singleton
-class ApplicationStart @Inject()(implicit ec: ExecutionContext){
+class ApplicationStart @Inject()(implicit ec: ExecutionContext,  lifecycle: ApplicationLifecycle,
+                                 system: ActorSystem,
+                                 injector: Injector){
   Await.result(UserQueries.setup(), Duration.Inf);
   Await.result(HistoryQueries.setup(), Duration.Inf);
+
+  val scheduler = QuartzSchedulerExtension.get(system)
+  val actor = system.actorOf(Props(classOf[ScheduleService]))
+  scheduler.schedule("Every30Seconds", actor, ScheduleService.SayHello("Peter"))
 }
