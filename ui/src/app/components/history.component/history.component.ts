@@ -115,13 +115,13 @@ export class HistoryComponent implements OnInit, OnDestroy {
   logIn(user: User) {
     // @ts-ignore
     let date = document.getElementsByName(user.id)[0].value
-    this.save(user, date ? date : Date.now(), HistoryType.Login)
+    this.save(user, date ? date : new Date().getTime(), HistoryType.Login)
   }
 
   logOut(user: User) {
     // @ts-ignore
     let date = document.getElementsByName(user.id)[0].value
-    this.save(user, date ? date : Date.now(), HistoryType.Logout)
+    this.save(user, date ? date : new Date().getTime(), HistoryType.Logout)
   }
 
   toggleMechanics(event: MouseEvent): void {
