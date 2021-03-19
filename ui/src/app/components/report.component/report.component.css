@@ -1,0 +1,9 @@
+td{
+  height: 30px;
+  font-size: 22px;
+}
+
+.user-rows:last-of-type td{
+  height: max-content;
+  vertical-align: top;
+}

@@ -1,41 +1,42 @@
-<div class="histories">
-  <div class="observer">
-    <ng-container *ngFor="let userHistory of usersHistory" class="observer">
-      <div [ngClass]="['userInfo', color(userHistory[1])]">
-        {{ userHistory[0].firstName }} {{ userHistory[0].lastName }}
-      </div>
-    </ng-container>
-  </div>
-
-  <div class="notifyer">
-    <div *ngFor="let user of users" class="userInfo fitContent">
-      <div class="date-placeholder">
-        {{ user.firstName }} {{ user.lastName }}
-      </div>
-      <div class="date-wrapper">
-        <ng-container *ngIf="user.type === userType.Manager">
-          <input [attr.name]="user.id" type="date" (change)="dateChange($event)">
+<table class="history-table">
+  <thead>
+    <tr>
+      <th>Current</th>
+      <th>Manual</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <ng-container *ngFor="let userHistory of usersHistory" class="observer">
+          <div [ngClass]="['userInfo', color(userHistory[1])]">
+            {{ userHistory[0].firstName }} {{ userHistory[0].lastName }}
+          </div>
         </ng-container>
-        <ng-container *ngIf="user.type !== userType.Manager">
-          <input [attr.name]="user.id" type="datetime-local">
-        </ng-container>
-      </div>
+      </td>
+      <td>
+        <table class="user-table">
+          <thead>
+          <tr>
+            <th>Mechanic</th>
+            <th>When Action Occurs</th>
+            <th>Action</th>
+          </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let userHistory of usersHistory" class="user-rows">
+              <td>{{ userHistory[0].firstName }} {{ userHistory[0].lastName }}</td>
+              <td> <input style="width: 100%; font-size: 18px; " [attr.name]="userHistory[0].id" type="datetime-local"> </td>
+              <td style="justify-content: center; display: flex; flex-direction: row">
+                <app-button  (click)="logIn(userHistory[0])" background="green" title="Login" image="assets/accept.svg" style="margin-right: 5px"></app-button>
+                <app-button  (click)="logOut(userHistory[0])" background="darkred" title="Logout" image="assets/delete.svg" style="margin-right: 5px"></app-button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </td>
+    </tr>
+  </tbody>
+</table>
 
-      <div *ngIf="user.type === userType.Manager" style="position: absolute; right: -130px;">
-        <app-button (click)="sendEmail(user)" background="blue" title="Send" image="assets/send.svg"></app-button>
-      </div>
-      <div *ngIf="user.type !== userType.Manager"
-           style="position: absolute; right:  -233px; display: flex; flex-direction: row">
-        <app-button [ngClass]="isLogged(user) ? 'disabled' : ''" (click)="logIn(user)" background="green" title="Login" image="assets/accept.svg" style="margin-right: 5px"></app-button>
-        <app-button [ngClass]="isLogged(user) ? '' : 'disabled'"(click)="logOut(user)" background="darkred" title="Logout" image="assets/delete.svg" style="margin-right: 5px"></app-button>
-      </div>
-    </div>
-  </div>
-</div>
 
-<div #possibleReport>
-
-</div>
-
-<input (click)="toggleMechanics($event)" type="checkbox"
-       style="transform: scale(2); position: absolute; top: 10px; right: 20px">

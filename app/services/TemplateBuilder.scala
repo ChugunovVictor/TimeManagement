@@ -94,8 +94,8 @@ object TemplateBuilder {
 
     val rowTotal = pre.foldLeft((0,0))((acc, day) => {
         val loginLogout = day._2.partition(_.`type` == HistoryType.Login)
-        row = row.replaceAll(s"::${day._1}_start", s"${loginLogout._1.headOption.map(r => s"${r.date.getHour}:${r.date.getMinute}").getOrElse("")}")
-        row = row.replaceAll(s"::${day._1}_end", s"${loginLogout._2.lastOption.map(r => s"${r.date.getHour}:${r.date.getMinute}").getOrElse("")}")
+        row = row.replaceAll(s"::${day._1}_start", s"${loginLogout._1.headOption.map(r => s"${timeToString((r.date.getHour, r.date.getMinute))}").getOrElse("")}")
+        row = row.replaceAll(s"::${day._1}_end", s"${loginLogout._2.lastOption.map(r => s"${timeToString((r.date.getHour, r.date.getMinute))}").getOrElse("")}")
 
         val dailyTotal = period(day._2.toList)
         row = row.replaceAll(s"::${day._1}_total", s"${timeToString(dailyTotal)}")

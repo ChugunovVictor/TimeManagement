@@ -14,33 +14,14 @@ import {startWith, switchMap} from "rxjs/operators";
 export class HistoryComponent implements OnInit, OnDestroy {
   // @ts-ignore
   timeInterval1: Subscription;
-  // @ts-ignore
-  timeInterval2: Subscription;
   userType = UserType
 
-  // @ts-ignore
-  @ViewChild("possibleReport") possibleReport: ElementRef;
-
-  showMechanics = false;
-
+  users = []
   usersHistory: UserHistory[] = []
-  users: User[] = []
+
   userLogins: Map<string, boolean> = new Map()
 
-  constructor(private historyService: HistoryService, private userService: UserService) {
-  }
-
-  dateChange(event: any){
-    this.historyService.report(event.target.value).subscribe(result => this.possibleReport.nativeElement.innerHTML = result)
-  }
-
-  load() {
-    this.userService.load().subscribe(result => {
-      this.users = result.filter(r => r.isActive && (
-        !this.showMechanics ? r.type === UserType.Manager : true
-      // @ts-ignore
-      ))
-    })
+  constructor(private historyService: HistoryService) {
   }
 
   ngOnInit(): void {
@@ -60,33 +41,17 @@ export class HistoryComponent implements OnInit, OnDestroy {
         }
       )
     })
-
-    this.timeInterval2 = interval(30000).pipe(
-      startWith(0),
-      switchMap(() => this.userService.load())
-    ).subscribe(result => {
-      this.users = result.filter(r => r.isActive && (
-        !this.showMechanics ? r.type === UserType.Manager : true
-        // @ts-ignore
-      ))
-    })
   }
 
   ngOnDestroy(): void{
     this.timeInterval1.unsubscribe()
-    this.timeInterval2.unsubscribe()
   }
 
   isLogged(user: User): boolean{
     return this.userLogins.get(user.id) ? true : false
   }
 
-  sendEmail(user: User) {
-    // @ts-ignore
-    this.userService.sendReport(user.email, document.getElementsByName(user.id)[0].value).subscribe(
-      (result:any) => console.log(result)
-    )
-  }
+
 
   save(user: User, date: Date, type: HistoryType) {
     let result = {
@@ -122,12 +87,6 @@ export class HistoryComponent implements OnInit, OnDestroy {
     // @ts-ignore
     let date = document.getElementsByName(user.id)[0].value
     this.save(user, date ? date : new Date().getTime(), HistoryType.Logout)
-  }
-
-  toggleMechanics(event: MouseEvent): void {
-    // @ts-ignore
-    this.showMechanics = event.target.checked
-    this.load()
   }
 
   color(histories: History[]) {

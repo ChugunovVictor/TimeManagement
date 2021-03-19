@@ -1,0 +1,25 @@
+<table style="width: 100%;">
+  <thead>
+    <tr style="width: 100%;">
+      <th style="width: 300px;">Managers</th>
+      <th style="width: available">Preview </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td> <input style="font-size: 20px; width: 100%;" type="date" (change)="dateChange($event)"> </td>
+      <td [attr.rowspan]="users.length+1"> <div #possibleReport> </div> </td>
+    </tr>
+    <tr *ngFor="let user of users" class="user-rows">
+      <td>
+        {{ user.firstName }} {{ user.lastName }}
+        <app-button style="float: right" (click)="sendEmail(user)" background="blue" title="Send" image="assets/send.svg"></app-button>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+
+
+
+

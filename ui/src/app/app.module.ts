@@ -8,6 +8,7 @@ import {UserListComponent} from './components/user-list.component/user-list.comp
 import {HistoryComponent} from './components/history.component/history.component';
 import {ReactiveFormsModule} from "@angular/forms";
 import { ButtonComponent } from './components/button.component';
+import { ReportComponent } from './components/report.component/report.component';
 
 const routes: Routes = [
   {
@@ -17,6 +18,10 @@ const routes: Routes = [
   {
     path: 'history',
     component: HistoryComponent
+  },
+  {
+    path: 'report',
+    component: ReportComponent
   },
   {
     path: '**',
@@ -30,7 +35,8 @@ const routes: Routes = [
     AppComponent,
     UserListComponent,
     HistoryComponent,
-    ButtonComponent
+    ButtonComponent,
+    ReportComponent
   ],
   imports: [
     BrowserModule,

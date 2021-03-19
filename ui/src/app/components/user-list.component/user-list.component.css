@@ -6,7 +6,6 @@
 
 .user-list {
   flex: 1;
-  border: 1px solid black;
   table-layout: fixed;
   width: 100%;
 }
