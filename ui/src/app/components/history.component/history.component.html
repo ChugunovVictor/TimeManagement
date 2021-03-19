@@ -13,7 +13,6 @@
         {{ user.firstName }} {{ user.lastName }}
       </div>
       <div class="date-wrapper">
-
         <ng-container *ngIf="user.type === userType.Manager">
           <input [attr.name]="user.id" type="date" (change)="dateChange($event)">
         </ng-container>
@@ -27,8 +26,8 @@
       </div>
       <div *ngIf="user.type !== userType.Manager"
            style="position: absolute; right:  -233px; display: flex; flex-direction: row">
-        <app-button (click)="logIn(user)" background="green" title="Login" image="assets/accept.svg" style="margin-right: 5px"></app-button>
-        <app-button (click)="logOut(user)" background="darkred" title="Logout" image="assets/delete.svg" style="margin-right: 5px"></app-button>
+        <app-button [ngClass]="isLogged(user) ? 'disabled' : ''" (click)="logIn(user)" background="green" title="Login" image="assets/accept.svg" style="margin-right: 5px"></app-button>
+        <app-button [ngClass]="isLogged(user) ? '' : 'disabled'"(click)="logOut(user)" background="darkred" title="Logout" image="assets/delete.svg" style="margin-right: 5px"></app-button>
       </div>
     </div>
   </div>

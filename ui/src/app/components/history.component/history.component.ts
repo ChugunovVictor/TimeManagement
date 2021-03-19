@@ -1,17 +1,21 @@
-import {Component, OnInit, ViewChild, ElementRef} from '@angular/core';
+import {Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {UserService} from "../../services/user.service";
 import {HistoryService} from "../../services/history.service";
-import {UserHistory, History, HistoryType} from "../../model/history.model";
+import {History, HistoryType, UserHistory} from "../../model/history.model";
 import {User, UserType} from "../../model/user.model";
-import DateTimeFormat = Intl.DateTimeFormat;
+import {interval, Subscription} from "rxjs";
+import {startWith, switchMap} from "rxjs/operators";
 
 @Component({
   selector: 'app-history',
   templateUrl: 'history.component.html',
   styleUrls: ['./history.component.css']
 })
-export class HistoryComponent implements OnInit {
-
+export class HistoryComponent implements OnInit, OnDestroy {
+  // @ts-ignore
+  timeInterval1: Subscription;
+  // @ts-ignore
+  timeInterval2: Subscription;
   userType = UserType
 
   // @ts-ignore
@@ -21,6 +25,7 @@ export class HistoryComponent implements OnInit {
 
   usersHistory: UserHistory[] = []
   users: User[] = []
+  userLogins: Map<string, boolean> = new Map()
 
   constructor(private historyService: HistoryService, private userService: UserService) {
   }
@@ -29,19 +34,51 @@ export class HistoryComponent implements OnInit {
     this.historyService.report(event.target.value).subscribe(result => this.possibleReport.nativeElement.innerHTML = result)
   }
 
-  load(mechanics: boolean = false) {
+  load() {
     this.userService.load().subscribe(result => {
       this.users = result.filter(r => r.isActive && (
-        !mechanics ? r.type === UserType.Manager : true
+        !this.showMechanics ? r.type === UserType.Manager : true
+      // @ts-ignore
       ))
     })
   }
 
-  ngOnInit() {
-    this.historyService.load().subscribe(result => {
+  ngOnInit(): void {
+    this.timeInterval1 = interval(30000).pipe(
+      startWith(0),
+      switchMap(() => this.historyService.load())
+    ).subscribe(result => {
       this.usersHistory = result
+      result.forEach(r => {
+          let array = r[1].sort(
+            function (h1, h2) {
+              // @ts-ignore
+              return h2.date - h1.date;
+            }
+          );
+          this.userLogins.set(r[0].id, array.length > 0 ? array[array.length-1].type === HistoryType.Login : false)
+        }
+      )
     })
-    this.load()
+
+    this.timeInterval2 = interval(30000).pipe(
+      startWith(0),
+      switchMap(() => this.userService.load())
+    ).subscribe(result => {
+      this.users = result.filter(r => r.isActive && (
+        !this.showMechanics ? r.type === UserType.Manager : true
+        // @ts-ignore
+      ))
+    })
+  }
+
+  ngOnDestroy(): void{
+    this.timeInterval1.unsubscribe()
+    this.timeInterval2.unsubscribe()
+  }
+
+  isLogged(user: User): boolean{
+    return this.userLogins.get(user.id) ? true : false
   }
 
   sendEmail(user: User) {
@@ -59,34 +96,59 @@ export class HistoryComponent implements OnInit {
       type: type
     }
     this.historyService.save(result).subscribe(result => {
-      this.load(this.showMechanics);
+      this.historyService.load().subscribe(result => {
+        this.usersHistory = result
+        result.forEach(r => {
+            let array = r[1].sort(
+              function (h1, h2) {
+                // @ts-ignore
+                return h2.date - h1.date;
+              }
+            );
+            this.userLogins.set(r[0].id, array.length > 0 ? array[array.length-1].type === HistoryType.Login : false)
+          }
+        )
+      })
     });
   }
 
   logIn(user: User) {
     // @ts-ignore
-    this.save(user, document.getElementsByName(user.id)[0].value, HistoryType.Login)
+    let date = document.getElementsByName(user.id)[0].value
+    this.save(user, date ? date : Date.now(), HistoryType.Login)
   }
 
   logOut(user: User) {
     // @ts-ignore
-    this.save(user, document.getElementsByName(user.id)("input")[0].value, HistoryType.Logout)
+    let date = document.getElementsByName(user.id)[0].value
+    this.save(user, date ? date : Date.now(), HistoryType.Logout)
   }
 
   toggleMechanics(event: MouseEvent): void {
     // @ts-ignore
     this.showMechanics = event.target.checked
-    this.load(this.showMechanics)
+    this.load()
   }
 
   color(histories: History[]) {
     if (histories.length == 0) return "absent";
-    else if (this.isInTime(histories)) return "in-time";
-    else return "late";
+    return this.isInTime(histories);
   }
 
   isInTime(histories: History[]) {
-    let sorted = histories.map(r => new Date(r.date)).sort()
-    return sorted[0].getHours() <= 7 || (sorted[0].getHours() == 8 && sorted[0].getMinutes() == 0)
+    let array = histories.sort(
+      function (h1, h2) {
+        // @ts-ignore
+        return new Date(h1.date) - new Date(h2.date);
+      }
+    );
+
+    if(array[array.length-1].type === HistoryType.Login){
+      let first = new Date(array[0].date)
+      if( first.getHours() <= 7 || (first.getHours() == 8 && first.getMinutes() == 0) )
+        return "in-time";
+      else
+        return "late"
+    } else return "absent"
   }
 }
