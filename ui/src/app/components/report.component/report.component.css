@@ -7,3 +7,5 @@ td{
   height: max-content;
   vertical-align: top;
 }
+
+:host{    flex: 1;}

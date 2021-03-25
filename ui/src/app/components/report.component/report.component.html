@@ -7,7 +7,7 @@
   </thead>
   <tbody>
     <tr>
-      <td> <input style="font-size: 20px; width: 100%;" type="date" (change)="dateChange($event)"> </td>
+      <td> <input #targetDate style="font-size: 20px; width: 100%;" type="date" (change)="dateChange($event)"> </td>
       <td [attr.rowspan]="users.length+1"> <div #possibleReport> </div> </td>
     </tr>
     <tr *ngFor="let user of users" class="user-rows">

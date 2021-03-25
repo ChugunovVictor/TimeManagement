@@ -12,6 +12,9 @@ export class ReportComponent implements OnInit {
 
   // @ts-ignore
   @ViewChild("possibleReport") possibleReport: ElementRef;
+  // @ts-ignore
+  @ViewChild("targetDate") targetDate: ElementRef;
+
   users: User[] = []
   constructor(private userService: UserService, private historyService: HistoryService) { }
 
@@ -23,7 +26,7 @@ export class ReportComponent implements OnInit {
 
   sendEmail(user: User) {
     // @ts-ignore
-    this.userService.sendReport(user.email, document.getElementsByName(user.id)[0].value).subscribe(
+    this.userService.sendReport(user.email, this.targetDate.nativeElement.value).subscribe(
       (result:any) => console.log(result)
     )
   }

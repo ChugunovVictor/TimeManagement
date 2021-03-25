@@ -44,6 +44,13 @@ object TemplateBuilder {
       (current.getHour - prev.getHour, current.getMinute - prev.getMinute )
   }
 
+  def differenceT(prev: (Int, Int), current: (Int, Int)): (Int, Int) = {
+    if( prev._2 > current._2 ){
+      (current._1 - 1 - prev._1, current._2 - prev._2 + 60 )
+    } else
+      (current._1 - prev._1, current._2 - prev._2 )
+  }
+
   def sum( prev: (Int, Int), current: (Int, Int) ): (Int, Int) = {
     val t = (current._1 + prev._1, current._2 + prev._2)
     (t._1 + t._2 / 60, t._2 % 60)

@@ -9,10 +9,16 @@ GET     /api/users                      controllers.UserController.list()
 POST    /api/user                       controllers.UserController.save()
 DELETE  /api/user/:id                   controllers.UserController.delete(id: String)
 GET     /api/user/:email/report/:date   controllers.UserController.report(email: String, date: Long)
+GET     /api/user/:id/history/:date     controllers.HistoryController.userList(id: String, date: Long)
 
 GET     /api/histories/:date            controllers.HistoryController.list(date: Long)
 POST    /api/history                    controllers.HistoryController.save()
 GET     /api/report/:date               controllers.HistoryController.report(date: Long)
+
+#Android
+GET     /api/ping                       controllers.HistoryController.ping()
+GET     /api/login/:id/:password        controllers.HistoryController.login(id: String, password: Int)
+GET     /api/logout/:id/:password       controllers.HistoryController.logout(id: String, password: Int)
 
 # Serve static assets under public directory
 GET     /*file                          controllers.FrontendController.assetOrDefault(file)

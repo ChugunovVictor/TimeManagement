@@ -85,4 +85,8 @@ object UserQueries{
   def delete(id: String)(implicit ec : ExecutionContext): Future[Done] = {
     App.db.run(App.users.filter(_.id === id).delete).map(_ => Done)
   }
+
+  def get(id: String)(implicit ec : ExecutionContext): Future[Option[User]] = {
+    App.db.run(App.users.filter(_.id === id).result.headOption)
+  }
 }

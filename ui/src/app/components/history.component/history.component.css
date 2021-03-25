@@ -56,7 +56,7 @@ td{
   font-size: 22px;
 }
 
-.user-rows:last-of-type td{
+.history-table tr:last-of-type td{
   height: max-content;
   vertical-align: top;
 }

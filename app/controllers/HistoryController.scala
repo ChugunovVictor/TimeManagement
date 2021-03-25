@@ -3,7 +3,7 @@ package controllers
 import java.time.{Instant, LocalDateTime, ZoneId}
 
 import javax.inject._
-import models.{History, HistoryQueries, User, UserQueries}
+import models.{History, HistoryQueries, HistoryType, User, UserQueries}
 import play.api.libs.json.Json
 import play.api.mvc._
 import services.TemplateBuilder
@@ -16,6 +16,13 @@ class HistoryController @Inject()(cc: ControllerComponents) extends AbstractCont
   def list(date: Long): Action[AnyContent] = Action.async { implicit request =>
     val normalDate = LocalDateTime.ofInstant(Instant.ofEpochMilli(date), ZoneId.systemDefault())
     HistoryQueries.list( normalDate, normalDate ).map { list =>
+      Ok(Json.toJson(list))
+    }
+  }
+
+  def userList(userId: String, date: Long): Action[AnyContent] = Action.async { implicit request =>
+    val normalDate = LocalDateTime.ofInstant(Instant.ofEpochMilli(date), ZoneId.systemDefault())
+    HistoryQueries.userList( normalDate, userId ).map { list =>
       Ok(Json.toJson(list))
     }
   }
@@ -40,4 +47,27 @@ class HistoryController @Inject()(cc: ControllerComponents) extends AbstractCont
       Future.successful(BadRequest(Json.toJson("Empty body")))
     )
   }
+
+
+  // Android
+
+  def ping(): Action[AnyContent] = Action.async { implicit request =>
+    HistoryQueries.ping().map { list =>
+      Ok(Json.toJson(list))
+    }
+  }
+
+  def login(userId: String, password: Int): Action[AnyContent] = Action.async { implicit request =>
+    HistoryQueries.logInOut(userId, password, HistoryType.Login).map { list =>
+      Ok(Json.toJson(list))
+    }
+  }
+
+  def logout(userId: String, password: Int): Action[AnyContent] = Action.async { implicit request =>
+    HistoryQueries.logInOut(userId, password, HistoryType.Logout).map { list =>
+      Ok(Json.toJson(list))
+    }
+  }
+
+
 }

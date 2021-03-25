@@ -9,9 +9,18 @@ import {HttpClient} from "@angular/common/http";
   providedIn: 'root'
 })
 export class HistoryService {
-  load(): Observable<UserHistory[]> {
+  list(): Observable<UserHistory[]> {
     // @ts-ignore
       return this.http.get<UserHistory[]>('/api/histories/:date'.replace(':date', new Date().getTime()));
+  }
+
+  userList(user:User, date:Date): Observable<History[]> {
+    console.log(user, date)
+    return this.http.get<History[]>('/api/user/:userId/history/:date'
+      // @ts-ignore
+      .replace(':date', date)
+      .replace(':userId', user.id)
+    );
   }
 
   save(history: History): Observable<string> {
