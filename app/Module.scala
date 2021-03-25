@@ -1,11 +1,14 @@
+import akka.actor.{ActorSystem, ExtendedActorSystem, Props}
 import com.google.inject.AbstractModule
-import com.typesafe.config.ConfigFactory
+import com.typesafe.akka.`extension`.quartz.QuartzSchedulerExtension
 
 import scala.concurrent.{Await, ExecutionContext}
 import javax.inject._
-import models.{HistoryQueries, UserQueries, UserTable}
-import slick.jdbc.JdbcBackend.Database
-import slick.lifted.TableQuery
+import models.{HistoryQueries, UserQueries}
+import play.api.inject.ApplicationLifecycle
+import play.inject.Injector
+import services.{GuiceActorProducer, MailerService}
+import services.services.ScheduleService
 
 import scala.concurrent.duration.Duration
 
@@ -24,11 +27,18 @@ class Module extends AbstractModule {
   override def configure() = {
     bind(classOf[ApplicationStart]).asEagerSingleton()
   }
-
 }
 
 @Singleton
-class ApplicationStart @Inject()(implicit ec: ExecutionContext){
+class ApplicationStart @Inject()(implicit ec: ExecutionContext,  lifecycle: ApplicationLifecycle,
+                                 system: ActorSystem,
+                                 injector: Injector){
   Await.result(UserQueries.setup(), Duration.Inf);
   Await.result(HistoryQueries.setup(), Duration.Inf);
+
+  // Start scheduling
+  val scheduler = QuartzSchedulerExtension(system)
+  val receiver = system.actorOf(Props.create(classOf[GuiceActorProducer], injector, classOf[ScheduleService]))
+  scheduler.schedule("sendEmail", receiver, ScheduleService.Send("now"), None)
 }
+

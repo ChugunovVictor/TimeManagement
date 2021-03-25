@@ -38,6 +38,8 @@
   <logger name="slick.jdbc.StatementInvoker.result"    level="DEBUG"/>
   <logger name="slick.compiler.QueryCompiler"          level="INFO"/>
 
+  <logger name="services.ScheduleService"              level="INFO"/>
+
   <root level="WARN">
     <appender-ref ref="ASYNCFILE" />
     <appender-ref ref="ASYNCSTDOUT" />

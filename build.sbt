@@ -41,6 +41,7 @@ libraryDependencies ++= Seq(
 
 libraryDependencies += "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.24"
 libraryDependencies += "org.xhtmlrenderer" % "flying-saucer-pdf" % "9.1.20"
+libraryDependencies += "com.enragedginger" %% "akka-quartz-scheduler" % "1.8.5-akka-2.6.x"
 
 scalaVersion in ThisBuild := "2.11.7"
 
