@@ -112,18 +112,25 @@ export class HistoryComponent implements OnInit, OnDestroy {
     });
   }
 
+  calcTime(d: Date): Date {
+    var utc = new Date(d).getTime() - (new Date(d).getTimezoneOffset() * 60000);
+    return new Date(utc);
+  }
+
   logIn(user: User) {
     // @ts-ignore
-    let date = document.getElementsByClassName(`${user.id}_time`)[0].value
+    let defaultDate = document.getElementsByClassName(`${user.id}_time`)[0].value;
+    let date = this.calcTime( defaultDate ? defaultDate : new Date().getTime() )
     // @ts-ignore
-    this.save(user, date ? Date.parse(date) : new Date().getTime(), HistoryType.Login)
+    this.save(user, Date.parse(date), HistoryType.Login)
   }
 
   logOut(user: User) {
     // @ts-ignore
-    let date = document.getElementsByClassName(`${user.id}_time`)[0].value
+    let defaultDate = document.getElementsByClassName(`${user.id}_time`)[0].value;
+    let date = this.calcTime( defaultDate ? defaultDate : new Date().getTime() )
     // @ts-ignore
-    this.save(user, date ? Date.parse(date) : new Date().getTime(),  HistoryType.Logout)
+    this.save(user, Date.parse(date), HistoryType.Logout);
   }
 
   color(histories: History[]) {
