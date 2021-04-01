@@ -57,14 +57,9 @@ class HistoryController @Inject()(cc: ControllerComponents) extends AbstractCont
     }
   }
 
-  def login(userId: String, password: Int): Action[AnyContent] = Action.async { implicit request =>
-    HistoryQueries.logInOut(userId, password, HistoryType.Login).map { list =>
-      Ok(Json.toJson(list))
-    }
-  }
 
-  def logout(userId: String, password: Int): Action[AnyContent] = Action.async { implicit request =>
-    HistoryQueries.logInOut(userId, password, HistoryType.Logout).map { list =>
+  def logInOut(userId: String, password: Int): Action[AnyContent] = Action.async { implicit request =>
+    HistoryQueries.logInOut(userId, password).map { list =>
       Ok(Json.toJson(list))
     }
   }

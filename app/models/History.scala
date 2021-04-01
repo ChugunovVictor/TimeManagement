@@ -195,14 +195,28 @@ object HistoryQueries {
       }).toSeq
   }
 
-  def logInOut(userId: String, password: Int, `type`: HistoryType)(implicit ec: ExecutionContext): Future[Int] = {
+  def logInOut(userId: String, password: Int)(implicit ec: ExecutionContext): Future[String] = {
+    val lastHistoryTypeQuery = sql"select h.type from history h where h.userId='#$userId' and Date(h.historyDate, 'localtime') >= Date('now', 'localtime') and Date(h.historyDate, 'localtime') <= Date('now', 'localtime') order by h.historyDate desc limit 1"
+
+    def updateStatus(lastStatus: Option[String]) ={
+      lastStatus match {
+        case Some(value) => HistoryType.withName(value) match {
+          case HistoryType.Login => App.db.run(sqlu"insert into history (userId, historyDate, type) values('#$userId', DateTime('now', 'localtime'), '#${HistoryType.Logout}')").map(_ => "Success")
+          case HistoryType.Logout => App.db.run(sqlu"insert into history (userId, historyDate, type) values('#$userId', DateTime('now', 'localtime'), '#${HistoryType.Login}')").map(_ => "Success")
+        }
+        case _ =>
+          App.db.run(sqlu"insert into history (userId, historyDate, type) values('#$userId', DateTime('now', 'localtime'), '#${HistoryType.Login}')").map(_ => "Success")
+      }
+    }
+
     for {
       user <- UserQueries.get(userId)
+      lastHistoryType <- App.db.run(lastHistoryTypeQuery.as[String].headOption)
       result <- user match {
-        case Some(u) => if (u.password.getOrElse(-1) == password)
-          App.db.run(sqlu"insert into history (userId, historyDate, type) values('#$userId', DateTime('now', 'localtime'), '#${`type`}')")
-        else Future.failed(new Exception("Incorrect password"))
-        case None => Future.failed(new Exception("User not found"))
+        case Some(u) => if (u.password.getOrElse(-1) == password) {
+          updateStatus(lastHistoryType)
+        } else Future.successful("Incorrect password")
+        case None => Future.successful("User not found")
       }
     } yield result
   }
