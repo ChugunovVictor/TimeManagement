@@ -21,7 +21,7 @@
 
 .userInfo{
   margin: 5px;
-  padding: 5px;
+  height: 100%;
   font-size: 22px;
   position: relative;
   display: flex;
@@ -52,7 +52,7 @@
 }
 
 td{
-  height: 30px;
+  /*height: 40px;*/
   font-size: 22px;
 }
 

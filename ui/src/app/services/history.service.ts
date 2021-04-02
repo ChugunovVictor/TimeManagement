@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import {Observable} from "rxjs";
 import {User} from "../model/user.model";
-import {History, UserHistory} from "../model/history.model";
+import {AdminLoginLogout, History, UserHistory} from "../model/history.model";
 import {HttpClient} from "@angular/common/http";
 
 
@@ -25,6 +25,14 @@ export class HistoryService {
 
   save(history: History): Observable<string> {
     return this.http.post<string>('/api/history', history);
+  }
+
+  logInOutAdmin(user: User): Observable<string> {
+    return this.http.get<string>('/api/logInOutAdmin/:userId/'.replace(':userId', user.id));
+  }
+
+  logInOutAdminForParticularDate(aLL: AdminLoginLogout): Observable<string> {
+    return this.http.post<string>('/api/logInOutAdminForParticularDate', aLL);
   }
 
   report(date: string): Observable<string> {

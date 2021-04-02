@@ -2,35 +2,49 @@
   <thead>
   <tr>
     <th rowspan="2" style="width: 50%">Current</th>
-    <th colspan="3" style="width: 50%">Manual</th>
+    <th colspan="5" style="width: 50%">Manual</th>
 
   </tr>
   <tr>
     <th>When Action Occurs</th>
-    <th>Action</th>
+    <th colspan="3">Action</th>
     <th>User History</th>
   </tr>
   </thead>
   <tbody>
-  <tr *ngFor="let userHistory of usersHistory; let i = index">
-    <td>
-      <div [ngClass]="['userInfo', color(userHistory[1])]">
+
+  <ng-container *ngFor="let userHistory of usersHistory; let i = index">
+    <tr>
+      <td [ngClass]="[color(userHistory[1])]" rowspan="2" style="position: relative">
         {{ userHistory[0].firstName }} {{ userHistory[0].lastName }}
-      </div>
-    </td>
-    <td><input [class]="userHistory[0].id + '_time'" style="width: 100%; font-size: 18px; " type="datetime-local"
-               (input)="displayHistory($event, userHistory[0])"></td>
-    <td style="justify-content: center; display: flex; flex-direction: row">
-      <app-button [class]="userHistory[0].id + '_login'" (click)="logIn(userHistory[0])" background="green" title="Login"
-                  image="assets/accept.svg" style="margin-right: 5px"></app-button>
-      <app-button [class]="userHistory[0].id + '_logout'" (click)="logOut(userHistory[0])" background="darkred"
-                  title="Logout" image="assets/delete.svg" style="margin-right: 5px"></app-button>
-    </td>
-    <td *ngIf="i==0" [attr.rowspan]="usersHistory.length" style="white-space: pre-line; vertical-align: top;">
-      {{
-      currentUserHistory
-      }}
-    </td>
+        <app-button (click)="logInOutAdmin(userHistory[0])" background="blue" title="Toggle"
+                    style="margin-right: 5px; position:absolute; top: 10px; right: 5px;"></app-button>
+      </td>
+      <td rowspan="2">
+        <input [class]="userHistory[0].id + '_date'" style="width: 100%; font-size: 18px; " type="date"
+                 (input)="displayHistory($event, userHistory[0])">
+      </td>
+
+      <td style="font-size: 20px; text-align: end"> Login:</td>
+      <td style="width: 100px"><input [class]="userHistory[0].id + '_login'" style="font-size: 15px" type="time"/></td>
+      <td rowspan="2" style="text-align: start">
+        <app-button (click)="logInOutAdminForParticularDate(userHistory[0])" background="blue" title="Process"
+                    style="margin-right: 5px;"></app-button>
+      </td>
+
+      <td *ngIf="i==0" [attr.rowspan]="usersHistory.length * 2" style="white-space: pre-line; vertical-align: top;">
+        {{
+        currentUserHistory
+        }}
+      </td>
+    </tr>
+
+    <tr>
+      <td style="font-size: 20px; text-align: end" > Logout:</td>
+      <td><input [class]="userHistory[0].id + '_logout'" style="font-size: 15px"type="time"/></td>
+    </tr>
+
+  </ng-container>
   </tbody>
 </table>
 

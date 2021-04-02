@@ -1,7 +1,7 @@
 package models
 
 import java.sql.Timestamp
-import java.time.{Instant, LocalDateTime}
+import java.time.{Instant, LocalDateTime, ZoneId}
 import java.time.format.DateTimeFormatter
 import java.util.TimeZone
 
@@ -23,6 +23,17 @@ object HistoryType extends Enumeration {
 
   implicit val readsHistory = Reads.enumNameReads(HistoryType)
   implicit val writesHistory = Writes.enumNameWrites
+}
+
+case class AdminLoginLogout(
+                             userId: String,
+                             date: Long,
+                             login: String,
+                             logout: String
+                           )
+
+object AdminLoginLogout {
+  implicit val adminLoginLogoutFormat = Json.format[AdminLoginLogout]
 }
 
 case class History(
@@ -195,26 +206,60 @@ object HistoryQueries {
       }).toSeq
   }
 
-  def logInOut(userId: String, password: Int)(implicit ec: ExecutionContext): Future[String] = {
+  def updateStatus(userId: String, lastStatus: Option[String])(implicit ec: ExecutionContext): Future[String] = {
+    lastStatus match {
+      case Some(value) => HistoryType.withName(value) match {
+        case HistoryType.Login => App.db.run(sqlu"insert into history (userId, historyDate, type) values('#$userId', DateTime('now', 'localtime'), '#${HistoryType.Logout}')").map(_ => "Success")
+        case HistoryType.Logout => App.db.run(sqlu"insert into history (userId, historyDate, type) values('#$userId', DateTime('now', 'localtime'), '#${HistoryType.Login}')").map(_ => "Success")
+      }
+      case _ =>
+        App.db.run(sqlu"insert into history (userId, historyDate, type) values('#$userId', DateTime('now', 'localtime'), '#${HistoryType.Login}')").map(_ => "Success")
+    }
+  }
+
+  def logInOutAdmin(userId: String)(implicit ec: ExecutionContext): Future[String] = {
     val lastHistoryTypeQuery = sql"select h.type from history h where h.userId='#$userId' and Date(h.historyDate, 'localtime') >= Date('now', 'localtime') and Date(h.historyDate, 'localtime') <= Date('now', 'localtime') order by h.historyDate desc limit 1"
 
-    def updateStatus(lastStatus: Option[String]) ={
-      lastStatus match {
-        case Some(value) => HistoryType.withName(value) match {
-          case HistoryType.Login => App.db.run(sqlu"insert into history (userId, historyDate, type) values('#$userId', DateTime('now', 'localtime'), '#${HistoryType.Logout}')").map(_ => "Success")
-          case HistoryType.Logout => App.db.run(sqlu"insert into history (userId, historyDate, type) values('#$userId', DateTime('now', 'localtime'), '#${HistoryType.Login}')").map(_ => "Success")
-        }
-        case _ =>
-          App.db.run(sqlu"insert into history (userId, historyDate, type) values('#$userId', DateTime('now', 'localtime'), '#${HistoryType.Login}')").map(_ => "Success")
-      }
-    }
+    for {
+      lastHistoryType <- App.db.run(lastHistoryTypeQuery.as[String].headOption)
+      result <- updateStatus(userId, lastHistoryType)
+    } yield result
+  }
+
+  def logInOutAdminForParticularDate(aLL: AdminLoginLogout)(implicit ec: ExecutionContext): Future[String] = {
+    val normalDate = LocalDateTime.ofInstant(Instant.ofEpochMilli(aLL.date), ZoneId.systemDefault())
+
+    val loginHistoryAction = History(
+      userId = aLL.userId,
+      date = {
+        normalDate.withHour(aLL.login.split(":")(0).toInt).withMinute(aLL.login.split(":")(1).toInt)
+      },
+      `type` = HistoryType.Login
+    )
+
+    val logoutHistoryAction = History(
+      userId = aLL.userId,
+      date = {
+        normalDate.withHour(aLL.logout.split(":")(0).toInt).withMinute(aLL.logout.split(":")(1).toInt)
+      },
+      `type` = HistoryType.Logout
+    )
+
+    (for {
+      _ <- HistoryQueries.insert(loginHistoryAction)
+      _ <- HistoryQueries.insert(logoutHistoryAction)
+    } yield ()).map(_ => "Success")
+  }
+
+  def logInOut(userId: String, password: Int)(implicit ec: ExecutionContext): Future[String] = {
+    val lastHistoryTypeQuery = sql"select h.type from history h where h.userId='#$userId' and Date(h.historyDate, 'localtime') >= Date('now', 'localtime') and Date(h.historyDate, 'localtime') <= Date('now', 'localtime') order by h.historyDate desc limit 1"
 
     for {
       user <- UserQueries.get(userId)
       lastHistoryType <- App.db.run(lastHistoryTypeQuery.as[String].headOption)
       result <- user match {
         case Some(u) => if (u.password.getOrElse(-1) == password) {
-          updateStatus(lastHistoryType)
+          updateStatus(userId, lastHistoryType)
         } else Future.successful("Incorrect password")
         case None => Future.successful("User not found")
       }

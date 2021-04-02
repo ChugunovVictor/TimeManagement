@@ -7,6 +7,13 @@ export interface History{
   type: HistoryType;
 }
 
+export interface AdminLoginLogout {
+  userId: string;
+  date: number;
+  login: string;
+  logout: string;
+}
+
 export enum HistoryType{
   Login = 'Login',
   Logout = 'Logout'

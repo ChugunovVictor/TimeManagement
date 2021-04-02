@@ -3,7 +3,7 @@ package controllers
 import java.time.{Instant, LocalDateTime, ZoneId}
 
 import javax.inject._
-import models.{History, HistoryQueries, HistoryType, User, UserQueries}
+import models.{AdminLoginLogout, History, HistoryQueries, HistoryType, User, UserQueries}
 import play.api.libs.json.Json
 import play.api.mvc._
 import services.TemplateBuilder
@@ -15,14 +15,14 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class HistoryController @Inject()(cc: ControllerComponents) extends AbstractController(cc) {
   def list(date: Long): Action[AnyContent] = Action.async { implicit request =>
     val normalDate = LocalDateTime.ofInstant(Instant.ofEpochMilli(date), ZoneId.systemDefault())
-    HistoryQueries.list( normalDate, normalDate ).map { list =>
+    HistoryQueries.list(normalDate, normalDate).map { list =>
       Ok(Json.toJson(list))
     }
   }
 
   def userList(userId: String, date: Long): Action[AnyContent] = Action.async { implicit request =>
     val normalDate = LocalDateTime.ofInstant(Instant.ofEpochMilli(date), ZoneId.systemDefault())
-    HistoryQueries.userList( normalDate, userId ).map { list =>
+    HistoryQueries.userList(normalDate, userId).map { list =>
       Ok(Json.toJson(list))
     }
   }
@@ -62,6 +62,27 @@ class HistoryController @Inject()(cc: ControllerComponents) extends AbstractCont
     HistoryQueries.logInOut(userId, password).map { list =>
       Ok(Json.toJson(list))
     }
+  }
+
+  def logInOutAdmin(userId: String): Action[AnyContent] = Action.async { implicit request =>
+    HistoryQueries.logInOutAdmin(userId).map { list =>
+      Ok(Json.toJson(list))
+    }
+  }
+
+  def logInOutAdminForParticularDate(): Action[AnyContent] = Action.async { implicit request =>
+    request.body.asJson.map { json =>
+      json.validate[AdminLoginLogout].map {
+        all =>
+          HistoryQueries.logInOutAdminForParticularDate(all).map { list =>
+            Ok(Json.toJson(list))
+          }
+      }.recoverTotal { error =>
+        Future.successful(BadRequest(Json.toJson(error.toString)))
+      }
+    }.getOrElse(
+      Future.successful(BadRequest(Json.toJson("Empty body")))
+    )
   }
 
 

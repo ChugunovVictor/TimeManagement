@@ -18,6 +18,8 @@ GET     /api/report/:date               controllers.HistoryController.report(dat
 #Android
 GET     /api/ping                       controllers.HistoryController.ping()
 GET     /api/logInOut/:id/:password     controllers.HistoryController.logInOut(id: String, password: Int)
+GET     /api/logInOutAdmin/:id/         controllers.HistoryController.logInOutAdmin(id: String)
+POST     /api/logInOutAdminForParticularDate    controllers.HistoryController.logInOutAdminForParticularDate()
 
 # Serve static assets under public directory
 GET     /*file                          controllers.FrontendController.assetOrDefault(file)
