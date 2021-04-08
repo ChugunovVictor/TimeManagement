@@ -11,7 +11,7 @@ import {HttpClient} from "@angular/common/http";
 export class HistoryService {
   list(): Observable<UserHistory[]> {
     // @ts-ignore
-      return this.http.get<UserHistory[]>('/api/histories/:date'.replace(':date', new Date().getTime()));
+      return this.http.get<UserHistory[]>('/api/histories/:date'.replace(':date', new Date().getTime() - new Date().getTimezoneOffset() * 60000));
   }
 
   userList(user:User, date:Date): Observable<History[]> {

@@ -57,7 +57,7 @@ export class HistoryComponent implements OnInit, OnDestroy {
 
   displayHistory(event: Event, user: User) {
     // @ts-ignore
-    this.historyService.userList(user, Date.parse(event.target.value)).subscribe(result => {
+    this.historyService.userList(user, Date.parse(event.target.value) - new Date().getTimezoneOffset() * 60000).subscribe(result => {
       let array = result.sort(
         function (h1: History, h2: History) {
           // @ts-ignore

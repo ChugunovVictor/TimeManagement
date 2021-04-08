@@ -1,7 +1,7 @@
 package models
 
 import java.sql.Timestamp
-import java.time.{Instant, LocalDateTime, ZoneId}
+import java.time.{Instant, LocalDateTime, ZoneId, ZoneOffset}
 import java.time.format.DateTimeFormatter
 import java.util.TimeZone
 
@@ -44,11 +44,12 @@ case class History(
                   )
 
 object History {
+  val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
   implicit val historyFormat = Json.format[History]
 
   implicit val getHistoryResult = GetResult(r => History(
-    r.nextString, LocalDateTime.ofInstant(Instant.ofEpochMilli(r.nextTimestamp.getTime),
-      TimeZone.getDefault().toZoneId()), HistoryType.withName(r.nextString), r.nextInt
+    r.nextString, LocalDateTime.parse(r.nextString, formatter) , HistoryType.withName(r.nextString), r.nextInt
   ))
 }
 
@@ -85,26 +86,26 @@ object HistoryQueries {
   }
 
   def insert(history: History)(implicit ec: ExecutionContext): Future[Int] = {
-    import java.time.format.DateTimeFormatter
-    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
     val sql = sqlu"insert into history (userId, historyDate, type) values('#${
       history.userId
-    }', DateTime('#${history.date.format(formatter)}'), '#${history.`type`}')"
+    }', #${history.date.toEpochSecond(ZoneOffset.UTC)}, '#${history.`type`}')"
 
     App.db.run(
       sql
     ).map(_ => history.id)
   }
 
-  def list(from: LocalDateTime, to: LocalDateTime)(implicit ec: ExecutionContext): Future[Map[User, Seq[History]]] = {
+  def list(from: Long, to: Long)(implicit ec: ExecutionContext): Future[Map[User, Seq[History]]] = {
     case class UserHistory(userId: String, firstName: String, lastName: String, userType: UserType,
                            email: Option[String], password: Option[Int], isActive: Boolean,
-                           date: Option[Timestamp], historyType: Option[HistoryType], historyId: Option[Int])
+                           date: Option[LocalDateTime], historyType: Option[HistoryType], historyId: Option[Int])
 
     object UserHistory {
+      val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
       implicit val getUserHistoryResult = GetResult(r => UserHistory(
         r.nextString, r.nextString, r.nextString, UserType.withName(r.nextString), r.nextStringOption, r.nextIntOption, r.nextBoolean,
-        r.nextTimestampOption, r.nextStringOption.map(HistoryType.withName), r.nextIntOption
+        r.nextStringOption.map(p => LocalDateTime.parse(p, formatter)), r.nextStringOption.map(HistoryType.withName), r.nextIntOption
       ))
 
       def to(uh: UserHistory): (User, Option[History]) = {
@@ -117,7 +118,7 @@ object HistoryQueries {
         val historyOpt = uh.historyId.map(_ =>
           History(
             userId = uh.userId,
-            date = uh.date.get.toLocalDateTime,
+            date = uh.date.get,
             `type` = uh.historyType.get,
             id = uh.historyId.get,
           )
@@ -125,15 +126,24 @@ object HistoryQueries {
         (user, historyOpt)
       }
     }
+    val query = if(from == -1){
 
-    val dateFromFormatted = DateTimeFormatter.ofPattern("yyyy-MM-dd").format(from)
-    val dateToFormatted = DateTimeFormatter.ofPattern("yyyy-MM-dd").format(to)
-
-    val query = sql"""select u.id, u.firstName, u.lastName, u.type, u.email, u.password, u.isActive,
-          strftime('%Y-%m-%d %H:%M:%f', h.historyDate), h.type, h.id
+      sql"""select u.id, u.firstName, u.lastName, u.type, u.email, u.password, u.isActive,
+          datetime(h.historyDate, 'unixepoch'), h.type, h.id
       from users u left join history h on (u.id = h.userId and
-          Date(h.historyDate, 'localtime') >= Date('#$dateFromFormatted') and Date(h.historyDate, 'localtime') <= Date('#$dateToFormatted'))
+          date(h.historyDate, 'unixepoch') >= date(strftime('%s','now', 'localtime'), 'unixepoch') and
+          date(h.historyDate, 'unixepoch') <= date(strftime('%s','now', 'localtime'), 'unixepoch'))
      """.as[UserHistory]
+    }
+    else{
+      sql"""select u.id, u.firstName, u.lastName, u.type, u.email, u.password, u.isActive,
+          datetime(h.historyDate, 'unixepoch'), h.type, h.id
+      from users u left join history h on (u.id = h.userId and
+          date(h.historyDate, 'unixepoch') >= date(#$from, 'unixepoch') and
+          date(h.historyDate, 'unixepoch') <= date(#$to, 'unixepoch'))
+     """.as[UserHistory]
+    }
+
 
     App.db.run(query)
       .map(_.map(r => UserHistory.to(r)))
@@ -143,11 +153,9 @@ object HistoryQueries {
       .map(_.filterNot(r => !r._1.isActive && r._2.isEmpty))
   }
 
-  def userList(date: LocalDateTime, userId: String)(implicit ec: ExecutionContext): Future[Seq[History]] = {
-    val dateFormatted = DateTimeFormatter.ofPattern("yyyy-MM-dd").format(date)
-
-    val query = sql"""select h.userId, strftime('%Y-%m-%d %H:%M:%f', h.historyDate), h.type, h.id
-      from history h where h.userId = '#$userId' and Date(h.historyDate) = Date('#$dateFormatted')
+  def userList(date: Long, userId: String)(implicit ec: ExecutionContext): Future[Seq[History]] = {
+    val query = sql"""select h.userId, datetime(h.historyDate, 'unixepoch'), h.type, h.id
+      from history h where h.userId = '#$userId' and date(h.historyDate, 'unixepoch') = date(#$date,'unixepoch')
      """.as[History]
 
     App.db.run(query)
@@ -172,7 +180,7 @@ object HistoryQueries {
     }
 
     for {
-      all <- list(LocalDateTime.now, LocalDateTime.now)
+      all <- list(-1, -1)
     } yield
       all.map(r => {
         val sorted = r._2.sortBy(_.date)
@@ -209,16 +217,18 @@ object HistoryQueries {
   def updateStatus(userId: String, lastStatus: Option[String])(implicit ec: ExecutionContext): Future[String] = {
     lastStatus match {
       case Some(value) => HistoryType.withName(value) match {
-        case HistoryType.Login => App.db.run(sqlu"insert into history (userId, historyDate, type) values('#$userId', DateTime('now', 'localtime'), '#${HistoryType.Logout}')").map(_ => "Success")
-        case HistoryType.Logout => App.db.run(sqlu"insert into history (userId, historyDate, type) values('#$userId', DateTime('now', 'localtime'), '#${HistoryType.Login}')").map(_ => "Success")
+        case HistoryType.Login => App.db.run(sqlu"insert into history (userId, historyDate, type) values('#$userId', strftime('%s','now', 'localtime'), '#${HistoryType.Logout}')").map(_ => "Success")
+        case HistoryType.Logout => App.db.run(sqlu"insert into history (userId, historyDate, type) values('#$userId', strftime('%s','now', 'localtime'), '#${HistoryType.Login}')").map(_ => "Success")
       }
       case _ =>
-        App.db.run(sqlu"insert into history (userId, historyDate, type) values('#$userId', DateTime('now', 'localtime'), '#${HistoryType.Login}')").map(_ => "Success")
+        App.db.run(sqlu"insert into history (userId, historyDate, type) values('#$userId', strftime('%s','now', 'localtime'), '#${HistoryType.Login}')").map(_ => "Success")
     }
   }
 
   def logInOutAdmin(userId: String)(implicit ec: ExecutionContext): Future[String] = {
-    val lastHistoryTypeQuery = sql"select h.type from history h where h.userId='#$userId' and Date(h.historyDate, 'localtime') >= Date('now', 'localtime') and Date(h.historyDate, 'localtime') <= Date('now', 'localtime') order by h.historyDate desc limit 1"
+    val lastHistoryTypeQuery =
+      sql"""select h.type from history h where h.userId='#$userId' and
+           date(h.historyDate, 'unixepoch') >= date('now', 'localtime') and date(h.historyDate, 'unixepoch') <= date('now', 'localtime')order by h.historyDate desc limit 1"""
 
     for {
       lastHistoryType <- App.db.run(lastHistoryTypeQuery.as[String].headOption)
@@ -252,7 +262,7 @@ object HistoryQueries {
   }
 
   def logInOut(userId: String, password: Int)(implicit ec: ExecutionContext): Future[String] = {
-    val lastHistoryTypeQuery = sql"select h.type from history h where h.userId='#$userId' and Date(h.historyDate, 'localtime') >= Date('now', 'localtime') and Date(h.historyDate, 'localtime') <= Date('now', 'localtime') order by h.historyDate desc limit 1"
+    val lastHistoryTypeQuery = sql"select h.type from history h where h.userId='#$userId' and date(h.historyDate, 'unixepoch') >= date('now', 'unixepoch') and date(h.historyDate, 'unixepoch') <= date('now', 'unixepoch') order by h.historyDate desc limit 1"
 
     for {
       user <- UserQueries.get(userId)

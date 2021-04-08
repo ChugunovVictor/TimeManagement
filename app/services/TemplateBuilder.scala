@@ -1,6 +1,6 @@
 package services
 
-import java.time.{LocalDateTime, Period, ZoneId}
+import java.time.{LocalDateTime, Period, ZoneId, ZoneOffset}
 
 import models.{History, HistoryQueries, HistoryType, User}
 
@@ -122,7 +122,7 @@ object TemplateBuilder {
 
     table = table.replaceAll("::title", title(start, end))
 
-    val userInfo = Await.result(HistoryQueries.list(start, end), Duration.Inf)
+    val userInfo = Await.result(HistoryQueries.list(start.toEpochSecond(ZoneOffset.UTC), end.toEpochSecond(ZoneOffset.UTC)), Duration.Inf)
     val ( rows, total ) = userInfo.foldLeft(("", (0,0))) ( (acc, c) => {
       val current = row(c._1, c._2)
       (acc._1 + current._1, sum( acc._2, current._2))

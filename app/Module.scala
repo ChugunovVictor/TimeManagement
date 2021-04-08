@@ -7,7 +7,7 @@ import javax.inject._
 import models.{HistoryQueries, UserQueries}
 import play.api.inject.ApplicationLifecycle
 import play.inject.Injector
-import services.{GuiceActorProducer, MailerService}
+import services.{CleanService, GuiceActorProducer, MailerService}
 import services.services.ScheduleService
 
 import scala.concurrent.duration.Duration
@@ -40,5 +40,10 @@ class ApplicationStart @Inject()(implicit ec: ExecutionContext,  lifecycle: Appl
   val scheduler = QuartzSchedulerExtension(system)
   val receiver = system.actorOf(Props.create(classOf[GuiceActorProducer], injector, classOf[ScheduleService]))
   scheduler.schedule("sendEmail", receiver, ScheduleService.Send("now"), None)
+
+  // Start scheduling
+  val cleaner = QuartzSchedulerExtension(system)
+  val cleanerReceiver = system.actorOf(Props.create(classOf[GuiceActorProducer], injector, classOf[CleanService]))
+  cleaner.schedule("clean", cleanerReceiver, CleanService.CleanSend("now"), None)
 }
 

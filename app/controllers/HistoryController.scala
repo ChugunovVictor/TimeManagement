@@ -14,15 +14,13 @@ import scala.concurrent.ExecutionContext.Implicits.global
 @Singleton
 class HistoryController @Inject()(cc: ControllerComponents) extends AbstractController(cc) {
   def list(date: Long): Action[AnyContent] = Action.async { implicit request =>
-    val normalDate = LocalDateTime.ofInstant(Instant.ofEpochMilli(date), ZoneId.systemDefault())
-    HistoryQueries.list(normalDate, normalDate).map { list =>
+    HistoryQueries.list(date / 1000, date / 1000).map { list =>
       Ok(Json.toJson(list))
     }
   }
 
   def userList(userId: String, date: Long): Action[AnyContent] = Action.async { implicit request =>
-    val normalDate = LocalDateTime.ofInstant(Instant.ofEpochMilli(date), ZoneId.systemDefault())
-    HistoryQueries.userList(normalDate, userId).map { list =>
+    HistoryQueries.userList(date / 1000, userId).map { list =>
       Ok(Json.toJson(list))
     }
   }
