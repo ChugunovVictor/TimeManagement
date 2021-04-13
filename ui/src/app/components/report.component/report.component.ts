@@ -31,7 +31,13 @@ export class ReportComponent implements OnInit {
     )
   }
 
+  dateToUTC(date: Date){
+    let utc = `${date.getUTCFullYear()}-${date.getUTCMonth() + 1}-${date.getUTCDate()}`
+    return new Date(Date.parse(utc)).getTime()
+  }
+
   dateChange(event: any){
-    this.historyService.report(event.target.value).subscribe(result => this.possibleReport.nativeElement.innerHTML = result)
+    // @ts-ignore
+    this.historyService.report(this.dateToUTC(event.target.valueAsDate)).subscribe(result => this.possibleReport.nativeElement.innerHTML = result)
   }
 }

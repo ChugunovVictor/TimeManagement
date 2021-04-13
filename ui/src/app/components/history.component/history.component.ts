@@ -55,9 +55,14 @@ export class HistoryComponent implements OnInit, OnDestroy {
     return this.userLogins.get(user.id) ? true : false
   }
 
+  dateToUTC(date: Date){
+    let utc = `${date.getUTCFullYear()}-${date.getUTCMonth() + 1}-${date.getUTCDate()}`
+    return new Date(Date.parse(utc)).getTime()
+  }
+
   displayHistory(event: Event, user: User) {
     // @ts-ignore
-    this.historyService.userList(user, new Date(event.target.valueAsDate.getTime() + 520 * 60000).getTime()).subscribe(result => {
+    this.historyService.userList(user, this.dateToUTC(event.target.valueAsDate)).subscribe(result => {
       let array = result.sort(
         function (h1: History, h2: History) {
           // @ts-ignore
