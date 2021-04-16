@@ -233,8 +233,8 @@ object HistoryQueries {
 
   def logInOutAdmin(userId: String)(implicit ec: ExecutionContext): Future[String] = {
     val lastHistoryTypeQuery =
-      sql"""select h.type from history h where h.userId='#$userId' and Date(h.historyDate, 'localtime')
-            >= Date('now', 'localtime') order by h.historyDate desc limit 1"""
+      sql"""select h.type from history h where h.userId='#$userId' and Date(h.historyDate)
+            >= Date('now') order by h.historyDate desc limit 1"""
 
     for {
       lastHistoryType <- App.db.run(lastHistoryTypeQuery.as[String].headOption)

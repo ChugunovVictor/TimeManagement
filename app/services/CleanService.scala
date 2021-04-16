@@ -1,6 +1,6 @@
 package services
 
-import java.time.LocalDateTime
+import java.time.{DayOfWeek, LocalDateTime}
 
 import akka.Done
 import akka.actor.{Actor, Props}
@@ -12,7 +12,7 @@ import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, ExecutionContext, Future}
 
 
-class CleanService @Inject()(ec: ExecutionContext, ms: MailerService) extends Actor {
+class CleanService @Inject()(ec: ExecutionContext) extends Actor {
   val logger: Logger = Logger(this.getClass())
   implicit val ctx = ec
 
@@ -20,24 +20,18 @@ class CleanService @Inject()(ec: ExecutionContext, ms: MailerService) extends Ac
   import CleanService._
 
   override def receive: Receive = {
-    /*case Tick() => {
-      logger.info("Tick");
-    }*/
     case CleanSend(value) => {
-      if (LocalDateTime.now().getHour() == 19){
-      val action = for{
-        users <- HistoryQueries.ping
-        _ <- Future.sequence(
-          users.filter(_.isLogged).map(r=> HistoryQueries.logInOutAdmin(r.userId))
-        )
-      } yield Done
-      Await.result(action, Duration.Inf)
-    }}
+      logger.debug("CleanSend check: " + LocalDateTime.now().toString);
+      if (LocalDateTime.now().getHour() == 19 && LocalDateTime.now().getDayOfWeek == DayOfWeek.FRIDAY){
+        Await.result(HistoryQueries.logInOutAll(LocalDateTime.now()), Duration.Inf)
+      }
+    }
   }
 }
 
 object CleanService {
   def props = Props[CleanService]
+  val NAME = "CleanService"
 
   case class CleanSend(str:String)
   //case class Tick()

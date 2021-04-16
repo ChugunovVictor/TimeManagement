@@ -54,6 +54,7 @@
 td{
   /*height: 40px;*/
   font-size: 22px;
+  height: 44px;
 }
 
 .history-table tr:last-of-type td{

@@ -14,21 +14,21 @@ import scala.concurrent.duration.Duration
 
 object ScheduleService {
   def props = Props[ScheduleService]
-
+  val NAME = "ScheduleService"
   case class Send(str:String)
   //case class Tick()
 }
 
 class ScheduleService @Inject()(ec: ExecutionContext, ms: MailerService) extends Actor {
   val logger: Logger = Logger(this.getClass())
+
+
   implicit val ctx = ec
   import ScheduleService._
 
   override def receive: Receive = {
-    /*case Tick() => {
-      logger.info("Tick");
-    }*/
     case Send(value) => {
+      logger.debug("Send check: " + LocalDateTime.now().toString);
       if (LocalDateTime.now().getHour() == 19) {
         val users = Await.result(UserQueries.list(), Duration.Inf).filter(_.isActive).filter(_.`type` == UserType.Manager)
         ms.sendEmail( users.map(_.email.get), TemplateBuilder.make(LocalDateTime.now()))
