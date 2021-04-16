@@ -2,6 +2,7 @@ package controllers
 
 import java.time.{Instant, LocalDateTime, ZoneId}
 
+import akka.Done
 import javax.inject._
 import models.{AdminLoginLogout, History, HistoryQueries, HistoryType, User, UserQueries}
 import play.api.libs.json.Json
@@ -31,6 +32,11 @@ class HistoryController @Inject()(cc: ControllerComponents) extends AbstractCont
     val normalDate = LocalDateTime.ofInstant(Instant.ofEpochMilli(date), ZoneId.systemDefault())
     val r = TemplateBuilder.make(normalDate)
     Ok(Json.toJson(r))
+  }
+
+  def logOutAll(date: Long): Action[AnyContent] = Action.async { implicit request =>
+    val normalDate = LocalDateTime.ofInstant(Instant.ofEpochMilli(date), ZoneId.systemDefault())
+    HistoryQueries.logInOutAll(normalDate).map(r => Ok(Json.toJson(r)))
   }
 
   def save = Action.async { implicit request =>

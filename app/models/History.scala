@@ -49,8 +49,7 @@ object History {
   implicit val historyFormat = Json.format[History]
 
   implicit val getHistoryResult = GetResult(r => History(
-    r.nextString, LocalDateTime.ofInstant(Instant.ofEpochMilli(r.nextTimestamp.getTime),
-      TimeZone.getDefault().toZoneId()), HistoryType.withName(r.nextString), r.nextInt
+    r.nextString, LocalDateTime.parse(r.nextString, formatter), HistoryType.withName(r.nextString), r.nextInt
   ))
 }
 
@@ -133,10 +132,10 @@ object HistoryQueries {
     val query = from match {
       case Some(value) => {
         val dateFromFormatted = DateTimeFormatter.ofPattern("yyyy-MM-dd").format(value)
-        val dateToFormatted = DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss").format(to)
+        val dateToFormatted = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(to)
 
         sql"""select u.id, u.firstName, u.lastName, u.type, u.email, u.password, u.isActive,
-          strftime('%Y-%m-%d %H:%M:%f', h.historyDate), h.type, h.id
+          h.historyDate, h.type, h.id
       from users u left join history h on (u.id = h.userId and
           Date(h.historyDate) >= Date('#$dateFromFormatted') and DateTime(h.historyDate) <= DateTime('#$dateToFormatted'))
      """.as[UserHistory]
@@ -162,7 +161,7 @@ object HistoryQueries {
   def userList(date: LocalDateTime, userId: String)(implicit ec: ExecutionContext): Future[Seq[History]] = {
     val dateFormatted = DateTimeFormatter.ofPattern("yyyy-MM-dd").format(date)
 
-    val query = sql"""select h.userId, strftime('%Y-%m-%d %H:%M:%f', h.historyDate), h.type, h.id
+    val query = sql"""select h.userId, h.historyDate, h.type, h.id
       from history h where h.userId = '#$userId' and Date(h.historyDate) = Date('#$dateFormatted')
      """.as[History]
 
@@ -235,13 +234,30 @@ object HistoryQueries {
   def logInOutAdmin(userId: String)(implicit ec: ExecutionContext): Future[String] = {
     val lastHistoryTypeQuery =
       sql"""select h.type from history h where h.userId='#$userId' and Date(h.historyDate, 'localtime')
-            >= Date('now', 'localtime') and DateTime(h.historyDate, 'localtime') <= DateTime('now', 'localtime')
-           order by h.historyDate desc limit 1"""
+            >= Date('now', 'localtime') order by h.historyDate desc limit 1"""
 
     for {
       lastHistoryType <- App.db.run(lastHistoryTypeQuery.as[String].headOption)
       result <- updateStatus(userId, lastHistoryType)
     } yield result
+  }
+
+  def logInOutAll(date: LocalDateTime)(implicit ec: ExecutionContext): Future[String] = {
+    implicit class OrderedLocalDateTime(time: LocalDateTime) extends Ordered[LocalDateTime] {
+      override def compare(that: LocalDateTime): Int = time.compareTo(that)
+    }
+    val correctedDate = date.withHour(19).withMinute(0)
+    val dateToFormatted = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(correctedDate)
+    (for{
+      users <- HistoryQueries.list(Some(date), correctedDate.withMinute(1))
+      _ <- Future.sequence(
+        users.filter { case (user, histories) =>
+          !histories.isEmpty && histories.sortBy(_.date).last.`type` == HistoryType.Login
+        }.map(r =>
+          App.db.run(sqlu"insert into history (userId, historyDate, type) values('#${r._1.id}', DateTime('#$dateToFormatted'), '#${HistoryType.Logout}')").map(_ => "Success")
+        )
+      )
+    } yield Done).map(_ => "Done")
   }
 
   def logInOutAdminForParticularDate(aLL: AdminLoginLogout)(implicit ec: ExecutionContext): Future[String] = {
@@ -272,8 +288,7 @@ object HistoryQueries {
   def logInOut(userId: String, password: Int)(implicit ec: ExecutionContext): Future[String] = {
     val lastHistoryTypeQuery =
       sql"""select h.type from history h where h.userId='#$userId' and Date(h.historyDate)
-            >= Date('now') and DateTime(h.historyDate, 'localtime') <= DateTime('now', 'localtime')
-           order by h.historyDate desc limit 1"""
+            >= Date('now') order by h.historyDate desc limit 1"""
 
     for {
       user <- UserQueries.get(userId)

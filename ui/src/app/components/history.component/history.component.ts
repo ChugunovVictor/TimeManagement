@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit, ViewChild, ElementRef} from '@angular/core';
 import {HistoryService} from "../../services/history.service";
 import {History, HistoryType, UserHistory} from "../../model/history.model";
 import {User, UserType} from "../../model/user.model";
@@ -20,12 +20,14 @@ export class HistoryComponent implements OnInit, OnDestroy {
   currentUserHistory: string = ''
 
   userLogins: Map<string, boolean> = new Map()
+  // @ts-ignore
+  @ViewChild('logOutAllInput') logOutAllInput: ElementRef;
 
   constructor(private historyService: HistoryService) {
   }
 
   ngOnInit(): void {
-    this.timeInterval1 = interval(1130000).pipe(
+    this.timeInterval1 = interval(30000).pipe(
       startWith(0),
       switchMap(() => this.historyService.list())
     ).subscribe(result => {
@@ -82,7 +84,9 @@ export class HistoryComponent implements OnInit, OnDestroy {
 
       for (let i = 0; i < array.length; i++) {
         let currentDate = new Date(Date.parse(array[i].date))
-        this.currentUserHistory += `${currentDate.getHours()}:${currentDate.getMinutes()} - ${array[i].type}\n`
+        this.currentUserHistory += `${currentDate.getHours()}:${
+          currentDate.getMinutes() > 9 ? currentDate.getMinutes(): '0' + currentDate.getMinutes()
+        } - ${array[i].type}\n`
 
         if (array[i].date < Date.now()) {
           if (array[i].type == HistoryType.Login) {
@@ -121,9 +125,11 @@ export class HistoryComponent implements OnInit, OnDestroy {
     });
   }
 
-  calcTime(d: Date): Date {
-    var utc = new Date(d).getTime() - (new Date(d).getTimezoneOffset() * 60000);
-    return new Date(utc);
+  logOutAll(){
+    let chosenDate = this.logOutAllInput.nativeElement.valueAsDate
+    if(!chosenDate) chosenDate = new Date()
+    // @ts-ignore
+    this.historyService.logOutAll(this.dateToUTC(chosenDate)).subscribe(response => console.log(response))
   }
 
   logInOutAdmin(user: User) {

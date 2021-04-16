@@ -2,7 +2,7 @@ import {Component, Input, OnInit} from '@angular/core';
 
 @Component({
   selector: 'app-button',
-  template: `<label class="button" [ngStyle]="{'color': color, 'background': background}">
+  template: `<label [class]="clazz" [ngStyle]="{'color': color, 'background': background}">
     <span>&nbsp;{{title}}&nbsp;</span>
     <img [src]="image">
   </label>`,
@@ -10,6 +10,7 @@ import {Component, Input, OnInit} from '@angular/core';
 })
 export class ButtonComponent implements OnInit {
   @Input() image: string = '';
+  @Input() clazz: string = 'button';
   @Input() title: string = '';
   @Input() color: string = 'white';
   @Input() background: string = '';

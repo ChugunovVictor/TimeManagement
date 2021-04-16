@@ -23,6 +23,10 @@ export class HistoryService {
     );
   }
 
+  logOutAll(date:string): Observable<string> {
+    return this.http.get<string>('/api/logOutAll/:date'.replace(':date', date));
+  }
+
   save(history: History): Observable<string> {
     return this.http.post<string>('/api/history', history);
   }
@@ -37,7 +41,7 @@ export class HistoryService {
 
   report(date: string): Observable<string> {
     // @ts-ignore
-      return this.http.get<string>('/api/report/:date'.replace(':date', Date.parse(date)));
+      return this.http.get<string>('/api/report/:date'.replace(':date', date));
   }
 
   constructor(private http: HttpClient) {

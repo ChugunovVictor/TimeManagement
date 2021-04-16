@@ -14,6 +14,7 @@ GET     /api/user/:id/history/:date     controllers.HistoryController.userList(i
 GET     /api/histories/:date            controllers.HistoryController.list(date: Long)
 POST    /api/history                    controllers.HistoryController.save()
 GET     /api/report/:date               controllers.HistoryController.report(date: Long)
+GET     /api/logOutAll/:date            controllers.HistoryController.logOutAll(date: Long)
 
 #Android
 GET     /api/ping                       controllers.HistoryController.ping()

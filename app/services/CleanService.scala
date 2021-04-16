@@ -24,6 +24,7 @@ class CleanService @Inject()(ec: ExecutionContext, ms: MailerService) extends Ac
       logger.info("Tick");
     }*/
     case CleanSend(value) => {
+      if (LocalDateTime.now().getHour() == 19){
       val action = for{
         users <- HistoryQueries.ping
         _ <- Future.sequence(
@@ -31,7 +32,7 @@ class CleanService @Inject()(ec: ExecutionContext, ms: MailerService) extends Ac
         )
       } yield Done
       Await.result(action, Duration.Inf)
-    }
+    }}
   }
 }
 

@@ -118,7 +118,7 @@ object TemplateBuilder {
     var table = scala.io.Source.fromFile(getClass.getResource("/template/table.html").getFile()).getLines.mkString
 
     val start = step(7, date)
-    val end = start.plusDays(6)
+    val end:LocalDateTime = start.plusDays(6).withHour(23).withMinute(59)
 
     table = table.replaceAll("::title", title(start, end))
 

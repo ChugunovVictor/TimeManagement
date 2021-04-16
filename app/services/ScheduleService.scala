@@ -29,8 +29,10 @@ class ScheduleService @Inject()(ec: ExecutionContext, ms: MailerService) extends
       logger.info("Tick");
     }*/
     case Send(value) => {
-      val users = Await.result(UserQueries.list(), Duration.Inf).filter(_.isActive).filter(_.`type` == UserType.Manager)
-      ms.sendEmail( users.map(_.email.get), TemplateBuilder.make(LocalDateTime.now()))
+      if (LocalDateTime.now().getHour() == 19) {
+        val users = Await.result(UserQueries.list(), Duration.Inf).filter(_.isActive).filter(_.`type` == UserType.Manager)
+        ms.sendEmail( users.map(_.email.get), TemplateBuilder.make(LocalDateTime.now()))
+      }
     }
   }
 }
