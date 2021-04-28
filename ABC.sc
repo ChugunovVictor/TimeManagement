@@ -1,52 +1,49 @@
-import java.time.LocalDateTime
+case class Node(value: Int, next: Option[Node])
 
-import models.{History, HistoryType}
-
-def difference(prev: LocalDateTime, current: LocalDateTime): (Int, Int) = {
-  if( prev.getMinute > current.getMinute ){
-    (current.getHour - 1 - prev.getHour, current.getMinute - prev.getMinute + 60 )
-  } else
-    (current.getHour - prev.getHour, current.getMinute - prev.getMinute )
-}
-
-def sum( prev: (Int, Int), current: (Int, Int) ): (Int, Int) = {
-  val t = (current._1 + prev._1, current._2 + prev._2)
-  (t._1 + t._2 / 60, t._2 % 60)
-}
-
-def period(histories: Seq[History], previous: Option[LocalDateTime] = None, hours: Int = 0, minutes: Int = 0): (Int, Int) = histories match {
-  case Nil => (hours, minutes)
-  case head :: Nil => previous match {
-    case Some(prev) => head.`type` match {
-      case HistoryType.Login => (hours, minutes)
-      case HistoryType.Logout => {
-        val diff = difference(prev, head.date)
-        sum( (hours, minutes), diff )
+def _add(l1: Option[Node], l2: Option[Node], a: Int = 0): Option[Node] = {
+    val r: (Int, Option[Node]) = (l1, l2) match {
+      case (Some(v1), Some(v2)) => {
+        val v = v1.value + v2.value + a
+        if( v > 10 ) (v % 10, _add( v1.next, v2.next, 1 ))
+        else ( v, _add( v1.next, v2.next) )
       }
-    }
-    case None => (hours, minutes)
-  }
-  case head :: tail => previous match {
-    case Some(prev) => head.`type` match {
-      case HistoryType.Login => (hours, minutes)
-      case HistoryType.Logout => {
-        val diff = difference(prev, head.date)
-        val newHM = sum( (hours, minutes), diff )
-        period(tail, None, newHM._1, newHM._2)
+      case (Some(v1), None) => {
+        val v = v1.value + a
+        if( v > 10 ) (v % 10, _add( v1.next, None, 1 ))
+        else ( v, v1.next )
       }
+      case (None, Some(v2)) => {
+        val v = v2.value + a
+        if( v > 10 ) (v % 10, _add( v2.next, None, 1 ))
+        else ( v, v2.next )
+      }
+      case (None, None) => (a, None)
     }
-    case None => head.`type` match {
-      case HistoryType.Login => period(tail, Some(head.date), hours, minutes)
-      case HistoryType.Logout => (hours, minutes)
-    }
-  }
+
+  if ( r._2.isEmpty && r._1 == 0 ) None
+  else  Some( Node( r._1, r._2 ) )
+
 }
 
-val a = Seq(
-  History("", LocalDateTime.of(2021, 3, 17, 8, 45), HistoryType.Login),
-  History("", LocalDateTime.of(2021, 3, 17, 10, 30), HistoryType.Logout),
-  History("", LocalDateTime.of(2021, 3, 17, 16, 30), HistoryType.Login),
-  History("", LocalDateTime.of(2021, 3, 17, 18, 48), HistoryType.Logout),
-)
+def add(l1: Node, l2: Node): Node = {
+  _add(Some(l1), Some(l2)).get
+}
 
-period(a)
+val l1 = Node( 4, Some(Node( 3, Some(Node( 2, Some(Node( 1, None)))))))
+val l2 = Node( 1, Some(Node( 2, Some(Node( 3, Some(Node( 4, None)))))))
+
+add( l1, l2 )
+
+val l3 = Node( 4, Some(Node( 3, None)))
+val l4 = Node( 0, Some(Node( 1, Some(Node( 3, None)))))
+
+add( l3, l4 )
+
+
+
+
+
+
+
+
+

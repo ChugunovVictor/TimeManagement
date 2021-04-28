@@ -4,6 +4,7 @@ import {History, HistoryType, UserHistory} from "../../model/history.model";
 import {User, UserType} from "../../model/user.model";
 import {interval, Subscription} from "rxjs";
 import {startWith, switchMap} from "rxjs/operators";
+import {TranslationService} from "../../services/translation.service";
 
 @Component({
   selector: 'app-history',
@@ -23,7 +24,7 @@ export class HistoryComponent implements OnInit, OnDestroy {
   // @ts-ignore
   @ViewChild('logOutAllInput') logOutAllInput: ElementRef;
 
-  constructor(private historyService: HistoryService) {
+  constructor(private historyService: HistoryService, public local: TranslationService) {
   }
 
   ngOnInit(): void {

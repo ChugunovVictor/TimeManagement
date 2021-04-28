@@ -2,6 +2,8 @@ import {Component, OnInit, ViewChild, ElementRef} from '@angular/core';
 import {User, UserType} from "../../model/user.model";
 import {FormControl, FormGroup, Validators} from "@angular/forms";
 import {UserService} from "../../services/user.service";
+import {HistoryService} from "../../services/history.service";
+import {TranslationService} from "../../services/translation.service";
 
 @Component({
   selector: 'app-user-list',
@@ -96,7 +98,7 @@ export class UserListComponent implements OnInit {
     this.userService.load().subscribe(result => this.userList = result);
   }
 
-  constructor(private userService: UserService) {
+  constructor(private userService: UserService, public local: TranslationService) {
   }
 
   ngOnInit() {

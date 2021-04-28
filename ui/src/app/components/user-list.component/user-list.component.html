@@ -1,14 +1,14 @@
 <table class="user-list">
   <thead>
   <tr>
-    <th> First Name</th>
-    <th> Last Name</th>
-    <th> Type</th>
-    <th> Email</th>
-    <th> Password</th>
-    <th> Is Active</th>
+    <th> {{ local.getString('First_Name') }} </th>
+    <th> {{ local.getString('Last_Name') }} </th>
+    <th> {{ local.getString('Type') }} </th>
+    <th> {{ local.getString('Email') }} </th>
+    <th> {{ local.getString('Password') }} </th>
+    <th> {{ local.getString('Is_Active') }} </th>
     <th>
-      <app-button (click)="add()" background="blue" title="Add" image="assets/add.svg"></app-button>
+      <app-button (click)="add()" background="blue" [title]="local.getString('Add')"  clazz="button extended-button"  image="assets/add.svg"></app-button>
     </th>
   </tr>
   </thead>
@@ -16,12 +16,12 @@
   <tr *ngFor="let m of userList; let i = index">
     <td> {{ m.firstName }}</td>
     <td> {{ m.lastName }}</td>
-    <td> {{ m.type }}</td>
+    <td> {{ local.getString(m.type) }} </td>
     <td> {{ m.email }}</td>
     <td> {{ m.password }}</td>
     <td> {{ m.isActive }}</td>
     <td>
-      <app-button (click)="edit(m)" background="yellow" color="black" title="Edit" image="assets/edit.svg"></app-button>
+      <app-button (click)="edit(m)" background="yellow" color="black" [title]="local.getString('Edit')"  clazz="button extended-button"  image="assets/edit.svg"></app-button>
     </td>
   </tr>
   </tbody>
@@ -32,39 +32,39 @@
     <form [formGroup]="userForm">
       <table>
         <tr>
-          <td>First Name:</td>
+          <td>{{ local.getString('First_Name') }}:</td>
           <td><input type="text" formControlName="firstName"></td>
         </tr>
         <tr>
-          <td>Last Name:</td>
+          <td>{{ local.getString('Last_Name') }}:</td>
           <td><input type="text" formControlName="lastName"></td>
         </tr>
         <tr>
-          <td>Type:</td>
+          <td>{{ local.getString('Type') }}:</td>
           <td><select formControlName="type">
             <option></option>
-            <option> {{ userType.Manager }} </option>
-            <option> {{ userType.Machanic }} </option>
+            <option [value]="userType.Manager"> {{ local.getString(userType.Manager) }} </option>
+            <option [value]="userType.Machanic"> {{ local.getString(userType.Machanic) }} </option>
           </select></td>
         </tr>
         <tr *ngIf="userForm.value['type'] == userType.Manager">
-          <td>E-mail:</td>
+          <td>{{ local.getString('Email') }}:</td>
           <td><input #email type="email" formControlName="email" email="true"></td>
         </tr>
         <tr *ngIf="userForm.value['type'] == userType.Machanic">
-          <td>Password:</td>
+          <td>{{ local.getString('Password') }}:</td>
           <td><input #password type="text" formControlName="password"
                      (keypress)="passwordCheck($event)" minlength="4" maxlength="4"></td>
         </tr>
         <tr>
-          <td>Is active:</td>
+          <td>{{ local.getString('Is_Active') }}:</td>
           <td><input type="checkbox" formControlName="isActive"></td>
         </tr>
       </table>
 
       <div class="actions">
-        <app-button (click)="save()" background="green" title="Save" image="assets/accept.svg"></app-button>
-        <app-button (click)="cancel()" background="darkred" title="Cancel" image="assets/cancel.svg"></app-button>
+        <app-button (click)="save()" background="green" clazz="button extended-button" [title]="local.getString('Save')" image="assets/accept.svg"></app-button>
+        <app-button (click)="cancel()" background="darkred" clazz="button extended-button" [title]="local.getString('Cancel')" image="assets/cancel.svg"></app-button>
       </div>
     </form>
   </div>

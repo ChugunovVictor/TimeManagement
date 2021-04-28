@@ -16,20 +16,40 @@ object TemplateBuilder {
 
   def title(start: LocalDateTime, end: LocalDateTime): String = {
     (start, end) match {
-      case (s, e) if s.getYear != e.getYear => s"Time Sheet for the ${s.getDayOfMonth}th of ${s.getMonth.name.toLowerCase.capitalize} ${
-        s
-          .getYear
-      } to ${e.getDayOfMonth}th of ${e.getMonth.name.toLowerCase.capitalize} ${e.getYear}"
-      case (s, e) if (s.getYear == e.getYear && s.getMonthValue != e.getMonthValue) => s"Time Sheet for the ${
-        s
-          .getDayOfMonth
-      }th of ${
-        s.getMonth.name.toLowerCase.capitalize
-      } to ${e.getDayOfMonth}th of ${e.getMonth.name.capitalize} ${e.getYear}"
-      case _ => s"Time Sheet for the ${start.getDayOfMonth}th to ${end.getDayOfMonth}th of ${
-        start
-          .getMonth.name.toLowerCase.capitalize
-      } ${start.getYear}"
+      case (s, e) if s.getYear != e.getYear => {
+        var template = LangService.getString("Report_Title_1")
+
+        template = template.replaceAll("::day_from", s.getDayOfMonth.toString)
+        template = template.replaceAll("::month_from", LangService.getString(s.getMonth.name.toLowerCase.capitalize) )
+        template = template.replaceAll("::year_from", s.getYear.toString)
+        template = template.replaceAll("::day_to", e.getDayOfMonth.toString)
+        template = template.replaceAll("::month_to", LangService.getString(e.getMonth.name.toLowerCase.capitalize) )
+        template = template.replaceAll("::year_to", e.getYear.toString)
+
+        template
+      }
+
+      case (s, e) if (s.getYear == e.getYear && s.getMonthValue != e.getMonthValue) => {
+        var template = LangService.getString("Report_Title_2")
+
+        template = template.replaceAll("::day_from", s.getDayOfMonth.toString)
+        template = template.replaceAll("::month_from", LangService.getString(s.getMonth.name.toLowerCase.capitalize))
+        template = template.replaceAll("::year", s.getYear.toString)
+        template = template.replaceAll("::day_to", e.getDayOfMonth.toString)
+        template = template.replaceAll("::month_to", LangService.getString(e.getMonth.name.toLowerCase.capitalize))
+
+        template
+      }
+      case _ => {
+        var template = LangService.getString("Report_Title_3")
+
+        template = template.replaceAll("::day_from", start.getDayOfMonth.toString)
+        template = template.replaceAll("::month", LangService.getString(start.getMonth.name.toLowerCase.capitalize))
+        template = template.replaceAll("::year", start.getYear.toString)
+        template = template.replaceAll("::day_to", end.getDayOfMonth.toString)
+
+        template
+      }
     }
   }
 
@@ -92,7 +112,6 @@ object TemplateBuilder {
 
   def row(user: User, histories: Seq[History]): (String, (Int, Int)) = {
     var row = scala.io.Source.fromFile(getClass.getResource("/template/row.html").getFile()).getLines.mkString
-
     row = row.replaceAll("::firstname", user.firstName)
     row = row.replaceAll("::lastname", user.lastName)
     val pre = histories.sortBy(_.date.getDayOfMonth).groupBy(_.date.getDayOfWeek.name.toLowerCase).map { case (i,
@@ -121,6 +140,19 @@ object TemplateBuilder {
     val end:LocalDateTime = start.plusDays(6).withHour(23).withMinute(59)
 
     table = table.replaceAll("::title", title(start, end))
+
+    table = table.replaceAll("::first_name", LangService.getString("First_Name"))
+    table = table.replaceAll("::last_name", LangService.getString("Last_Name"))
+    table = table.replaceAll("::saturday", LangService.getString("Saturday"))
+    table = table.replaceAll("::sunday", LangService.getString("Sunday"))
+    table = table.replaceAll("::monday", LangService.getString("Monday"))
+    table = table.replaceAll("::tuesday", LangService.getString("Tuesday"))
+    table = table.replaceAll("::wednesday", LangService.getString("Wednesday"))
+    table = table.replaceAll("::thursday", LangService.getString("Thursday"))
+    table = table.replaceAll("::friday", LangService.getString("Friday"))
+    table = table.replaceAll("::total_hours", LangService.getString("Total_Hours"))
+    table = table.replaceAll("::inn", LangService.getString("Inn"))
+    table = table.replaceAll("::out", LangService.getString("Out"))
 
     val userInfo = Await.result(HistoryQueries.list(Some(start), end), Duration.Inf)
     val ( rows, total ) = userInfo.foldLeft(("", (0,0))) ( (acc, c) => {

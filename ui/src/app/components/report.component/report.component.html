@@ -1,8 +1,8 @@
 <table style="width: 100%;">
   <thead>
     <tr style="width: 100%;">
-      <th style="width: 300px;">Managers</th>
-      <th style="width: available">Preview </th>
+      <th style="width: 300px;"> {{ local.getString('Managers') }} </th>
+      <th style="width: available"> {{ local.getString('Preview') }}  </th>
     </tr>
   </thead>
   <tbody>
@@ -13,7 +13,7 @@
     <tr *ngFor="let user of users" class="user-rows">
       <td>
         {{ user.firstName }} {{ user.lastName }}
-        <app-button style="float: right" (click)="sendEmail(user)" background="blue" title="Send" image="assets/send.svg"></app-button>
+        <app-button style="float: right" (click)="sendEmail(user)" background="blue" [title]="local.getString('Send')"  clazz="button extended-button" image="assets/send.svg"></app-button>
       </td>
     </tr>
   </tbody>

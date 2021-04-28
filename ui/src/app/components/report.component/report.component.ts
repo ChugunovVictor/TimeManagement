@@ -2,6 +2,7 @@ import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import {User, UserType} from "../../model/user.model";
 import {HistoryService} from "../../services/history.service";
 import {UserService} from "../../services/user.service";
+import {TranslationService} from "../../services/translation.service";
 
 @Component({
   selector: 'app-report',
@@ -16,7 +17,9 @@ export class ReportComponent implements OnInit {
   @ViewChild("targetDate") targetDate: ElementRef;
 
   users: User[] = []
-  constructor(private userService: UserService, private historyService: HistoryService) { }
+  constructor(private userService: UserService,
+              private historyService: HistoryService,
+              public local: TranslationService) { }
 
   ngOnInit() {
     this.userService.load().subscribe(result => {
