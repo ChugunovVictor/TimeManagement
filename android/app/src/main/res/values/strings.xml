@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">ProDiesel</string>
+    <string name="enter"><b><sup>&#9166;</sup></b></string>
+    <string name="delete"><sup>&#9003;</sup></string>
+    <string name="profile_name">Sample Device Owner</string>
+    <string name="server_url_file">.server_url</string>
+</resources>
